@@ -1,11 +1,113 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>RTL Fixer v2 — widget</title>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; connect-src 'self'">
+  <title>RTL Fixer v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../editor/editor.css">
+  <link rel="stylesheet" href="./widget.css">
 </head>
-<body>
-  <p>Widget shell placeholder — implemented in Phase 4 (User Story 2).</p>
+<body data-mode="collapsed">
+
+  <!-- Mode 1: Collapsed circle -->
+  <div class="widget-collapsed" id="collapsed">
+    <div class="widget-bubble">
+      <span class="widget-bubble-letter">ع</span>
+      <div class="widget-bubble-pulse" id="bubble-pulse"></div>
+      <div class="widget-bubble-badge" id="bubble-badge" hidden></div>
+    </div>
+  </div>
+
+  <!-- Mode 2: Notification bar -->
+  <div class="widget-notification" id="notification">
+    <span class="widget-notif-dot"></span>
+    <span class="widget-notif-text">نص جديد متاح — دوس عشان تشوفه</span>
+  </div>
+
+  <!-- Mode 3: Expanded card with embedded editor -->
+  <div class="widget-expanded" id="expanded">
+    <div class="widget-titlebar">
+      <span class="widget-title">RTL <span class="accent">·</span> Fixer</span>
+      <div class="widget-titlebar-actions">
+        <button id="widget-collapse-btn" class="widget-icon-btn" title="طوّ النافذة">−</button>
+      </div>
+    </div>
+    <div class="widget-editor-host">
+      <div class="app" data-layout="vertical">
+        <header class="header">
+          <h1>RTL <span class="accent">·</span> Fixer</h1>
+          <div class="header-right">
+            <div class="layout-switch" role="group" aria-label="بدّل التخطيط">
+              <button class="layout-opt" data-layout="vertical" aria-pressed="true" title="عمودي">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <rect x="2" y="3"  width="12" height="2" rx="0.5"/>
+                  <rect x="2" y="7"  width="12" height="2" rx="0.5"/>
+                  <rect x="2" y="11" width="12" height="2" rx="0.5"/>
+                </svg>
+              </button>
+              <button class="layout-opt" data-layout="horizontal" aria-pressed="false" title="أفقي">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <rect x="2" y="3"  width="5"  height="10" rx="0.5"/>
+                  <rect x="9" y="3"  width="5"  height="10" rx="0.5"/>
+                </svg>
+              </button>
+            </div>
+            <span class="meta">growthmora · v2</span>
+          </div>
+        </header>
+
+        <section class="block input-block">
+          <div class="block-head">
+            <span class="block-label"><span class="arrow">←</span>من Claude</span>
+            <button id="clear-input">مسح</button>
+          </div>
+          <textarea
+            id="input"
+            placeholder="الصق هنا النص اللي طلع متلخبط من Claude Code..."
+            spellcheck="false"
+          ></textarea>
+        </section>
+
+        <section class="block grow output-block">
+          <div class="block-head">
+            <span class="block-label">النسخة المنسقة</span>
+            <button id="copy-output" class="primary" disabled>نسخ المنسق</button>
+          </div>
+          <div class="output-wrap">
+            <div
+              class="output"
+              id="output"
+              dir="auto"
+              data-placeholder="هيظهر هنا النص متنسق..."
+            ></div>
+          </div>
+        </section>
+
+        <section class="block reply-block">
+          <div class="block-head">
+            <span class="block-label"><span class="arrow">→</span>ردك لـ Claude</span>
+            <button id="clear-reply">مسح</button>
+            <button id="copy-reply" class="primary" disabled>
+              نسخ الرد<span class="kbd">⌃↵</span>
+            </button>
+          </div>
+          <textarea
+            id="reply"
+            placeholder="اكتب ردك بالعربي هنا، وبعدين انسخه و الصقه في Claude Code..."
+            spellcheck="false"
+          ></textarea>
+        </section>
+
+        <div class="status-bar" id="status"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./widget.ts"></script>
+  <script type="module" src="../editor/editor.ts"></script>
 </body>
 </html>

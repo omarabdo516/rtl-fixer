@@ -18,7 +18,7 @@ test.beforeEach(async () => {
   app = await electron.launch({ args: [APP_ENTRY], timeout: 15_000 });
   page = await app.firstWindow({ timeout: 10_000 });
   await page.waitForLoadState('domcontentloaded');
-  await page.waitForSelector('#input', { timeout: 5_000 });
+  await page.waitForSelector('#input', { state: 'attached', timeout: 5_000 });
 });
 
 test.afterEach(async () => {

@@ -1,0 +1,225 @@
+/* Widget shell — three modes (collapsed circle, notification bar, expanded
+   card). The Electron window is frameless+transparent; the visible shapes
+   live inside the body. */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  width: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: 'Tajawal', system-ui, -apple-system, sans-serif;
+  transition: opacity 240ms ease;
+}
+
+/* Mode visibility — only one mode is rendered at a time */
+body[data-mode="collapsed"] .widget-notification,
+body[data-mode="collapsed"] .widget-expanded { display: none; }
+
+body[data-mode="notification"] .widget-collapsed,
+body[data-mode="notification"] .widget-expanded { display: none; }
+
+body[data-mode="expanded"] .widget-collapsed,
+body[data-mode="expanded"] .widget-notification { display: none; }
+
+/* ─── Collapsed circle ─────────────────────────────────────────── */
+
+.widget-collapsed {
+  width: 60px;
+  height: 60px;
+  cursor: grab;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.widget-collapsed:active { cursor: grabbing; }
+
+.widget-bubble {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: oklch(58% 0.13 50 / 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 8px 24px oklch(0% 0 0 / 0.18),
+    0 2px 6px oklch(0% 0 0 / 0.1),
+    inset 0 1px 0 oklch(100% 0 0 / 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 200ms ease;
+}
+
+.widget-collapsed:active .widget-bubble { transform: scale(0.96); }
+
+.widget-bubble-letter {
+  color: oklch(99% 0 0);
+  font-family: 'Tajawal', system-ui, sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+/* Pulse ring — animates when new clipboard content arrives */
+.widget-bubble-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid oklch(58% 0.13 50);
+  opacity: 0;
+  pointer-events: none;
+}
+.widget-collapsed.is-pulsing .widget-bubble-pulse {
+  animation: pulse-ring 1.4s ease-out 0s 3;
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  70%  { transform: scale(1.6); opacity: 0;   }
+  100% { transform: scale(1.6); opacity: 0;   }
+}
+
+/* Notification badge */
+.widget-bubble-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: oklch(62% 0.21 30);
+  border: 2px solid oklch(99% 0 0);
+  pointer-events: none;
+}
+
+/* ─── Notification bar ─────────────────────────────────────────── */
+
+.widget-notification {
+  width: 240px;
+  height: 60px;
+  border-radius: 30px;
+  background: oklch(99% 0 0 / 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 12px 28px oklch(0% 0 0 / 0.18),
+    0 4px 8px oklch(0% 0 0 / 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 1.2rem;
+  gap: 0.7rem;
+  cursor: pointer;
+  animation: notification-slide-in 200ms ease-out;
+  user-select: none;
+  -webkit-user-select: none;
+  border: 1px solid oklch(90% 0.005 80);
+}
+
+.widget-notif-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: oklch(58% 0.13 50);
+  flex-shrink: 0;
+  animation: notif-dot-pulse 1.4s ease-in-out infinite;
+}
+@keyframes notif-dot-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(1.3); }
+}
+
+.widget-notif-text {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: oklch(20% 0.01 80);
+}
+
+@keyframes notification-slide-in {
+  from { transform: translateX(20px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+/* ─── Expanded card ────────────────────────────────────────────── */
+
+.widget-expanded {
+  width: 100%;
+  height: 100%;
+  background: oklch(98% 0.005 80);
+  border-radius: 12px;
+  box-shadow:
+    0 16px 40px oklch(0% 0 0 / 0.15),
+    0 4px 12px oklch(0% 0 0 / 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: expanded-fade-in 200ms ease-out;
+}
+
+@keyframes expanded-fade-in {
+  from { transform: scale(0.96); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.widget-titlebar {
+  height: 32px;
+  background: oklch(96% 0.005 80);
+  border-bottom: 1px solid oklch(90% 0.005 80);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.6rem 0 1rem;
+  -webkit-app-region: drag;
+  flex-shrink: 0;
+}
+
+.widget-title {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: oklch(20% 0.01 80);
+  letter-spacing: 0.04em;
+}
+.widget-title .accent { color: oklch(58% 0.13 50); }
+
+.widget-titlebar-actions {
+  display: flex;
+  gap: 0.25rem;
+  -webkit-app-region: no-drag;
+}
+
+.widget-icon-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: oklch(45% 0.01 80);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease, color 120ms ease;
+}
+.widget-icon-btn:hover { background: oklch(90% 0.005 80); color: oklch(20% 0.01 80); }
+
+.widget-editor-host {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  /* The editor's body padding compensates here */
+}
+
+/* Override editor body styling so it sits inside the host instead of
+   filling the page. */
+.widget-editor-host .app {
+  height: 100%;
+  padding: 1rem 1.4rem;
+}
+
+/* ─── Auto-fade (collapsed mode only) ──────────────────────────── */
+body.is-faded { opacity: 0.3; }

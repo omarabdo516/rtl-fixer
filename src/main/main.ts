@@ -1,16 +1,14 @@
-// Electron main entry point. Phase 3 MVP wiring:
-//   1. Single-instance lock
-//   2. Settings store
-//   3. Self-fingerprint cache (shared between watcher and IPC handlers)
-//   4. Clipboard watcher (broadcasts arabicDetected to the widget)
-//   5. Widget window loading the migrated v1 editor
-//   6. IPC handlers (prefs:* + clipboard:*)
+// Electron main entry point.
+// Phase 4 wiring adds widget mode reactions, tray icon, and widget IPC
+// handlers on top of Phase 3's clipboard MVP.
 
-import { app, type BrowserWindow } from 'electron';
+import { app } from 'electron';
 import { createSettingsStore } from './services/settingsStore.js';
 import { createSelfFingerprintCache } from './services/selfFingerprintCache.js';
 import { createClipboardWatcher } from './services/clipboardWatcher.js';
-import { createWidgetWindow } from './windows/widgetWindow.js';
+import { createWidgetWindow, type WidgetWindowControl } from './windows/widgetWindow.js';
+import { createWidgetReactions } from './services/widgetReactions.js';
+import { createTrayManager } from './services/trayManager.js';
 import { registerIpcHandlers } from './ipc/handlers.js';
 import { IPC } from '../shared/ipc-channels.js';
 
@@ -21,12 +19,13 @@ if (!gotTheLock) {
   process.exit(0);
 }
 
-let widgetWindow: BrowserWindow | null = null;
+let widget: WidgetWindowControl | null = null;
 
 app.on('second-instance', () => {
-  if (widgetWindow) {
-    if (widgetWindow.isMinimized()) widgetWindow.restore();
-    widgetWindow.focus();
+  if (widget && !widget.window.isDestroyed()) {
+    if (widget.window.isMinimized()) widget.window.restore();
+    widget.window.focus();
+    widget.setMode('expanded');
   }
 });
 
@@ -37,33 +36,52 @@ app
     const selfFingerprintCache = createSelfFingerprintCache();
 
     const devServerUrl = process.env.VITE_DEV_SERVER_URL;
-    widgetWindow = devServerUrl
-      ? createWidgetWindow({ devServerUrl })
-      : createWidgetWindow();
+    widget = createWidgetWindow({
+      settingsStore,
+      ...(devServerUrl !== undefined ? { devServerUrl } : {}),
+      onModeChanged: (mode) => {
+        if (widget && !widget.window.isDestroyed()) {
+          widget.window.webContents.send(IPC.WIDGET_MODE_CHANGED, { mode });
+        }
+      },
+    });
 
-    widgetWindow.on('closed', () => {
-      widgetWindow = null;
+    const reactions = createWidgetReactions({ widget });
+    reactions.setPendingNotificationListener((hasPending) => {
+      if (widget && !widget.window.isDestroyed()) {
+        widget.window.webContents.send(IPC.WIDGET_PENDING_NOTIFICATION, { hasPending });
+      }
     });
 
     const clipboardWatcher = createClipboardWatcher({
       selfFingerprintCache,
       onArabicDetected: (event) => {
-        if (widgetWindow && !widgetWindow.isDestroyed()) {
-          widgetWindow.webContents.send(IPC.CLIPBOARD_ARABIC_DETECTED, event);
+        if (widget && !widget.window.isDestroyed()) {
+          widget.window.webContents.send(IPC.CLIPBOARD_ARABIC_DETECTED, event);
         }
+        reactions.handleClipboardArabic(event);
       },
     });
+
+    const tray = createTrayManager({ widget });
 
     registerIpcHandlers({
       settingsStore,
       clipboardWatcher,
       selfFingerprintCache,
+      widget,
     });
 
     clipboardWatcher.start();
 
     app.on('before-quit', () => {
       clipboardWatcher.stop();
+      reactions.dispose();
+      tray.destroy();
+    });
+
+    widget.window.on('closed', () => {
+      widget = null;
     });
   })
   .catch((err: unknown) => {

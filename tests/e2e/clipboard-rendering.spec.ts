@@ -19,7 +19,7 @@ test.beforeEach(async () => {
   page = await app.firstWindow({ timeout: 10_000 });
   await page.waitForLoadState('domcontentloaded');
   // Wait for editor.ts to finish initial render so #input exists
-  await page.waitForSelector('#input', { timeout: 5_000 });
+  await page.waitForSelector('#input', { state: 'attached', timeout: 5_000 });
 });
 
 test.afterEach(async () => {
