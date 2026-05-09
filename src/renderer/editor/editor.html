@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; connect-src 'self'">
+  <title>RTL Fixer v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./editor.css">
+</head>
+<body>
+  <div class="app" data-layout="vertical">
+
+    <header class="header">
+      <h1>RTL <span class="accent">·</span> Fixer</h1>
+      <div class="header-right">
+        <div class="layout-switch" role="group" aria-label="بدّل التخطيط">
+          <button class="layout-opt" data-layout="vertical" aria-pressed="true" title="عمودي">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <rect x="2" y="3"  width="12" height="2" rx="0.5"/>
+              <rect x="2" y="7"  width="12" height="2" rx="0.5"/>
+              <rect x="2" y="11" width="12" height="2" rx="0.5"/>
+            </svg>
+          </button>
+          <button class="layout-opt" data-layout="horizontal" aria-pressed="false" title="أفقي">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <rect x="2" y="3"  width="5"  height="10" rx="0.5"/>
+              <rect x="9" y="3"  width="5"  height="10" rx="0.5"/>
+            </svg>
+          </button>
+        </div>
+        <span class="meta">growthmora · v2</span>
+      </div>
+    </header>
+
+    <section class="block input-block">
+      <div class="block-head">
+        <span class="block-label"><span class="arrow">←</span>من Claude</span>
+        <button id="clear-input">مسح</button>
+      </div>
+      <textarea
+        id="input"
+        placeholder="الصق هنا النص اللي طلع متلخبط من Claude Code..."
+        autofocus
+        spellcheck="false"
+      ></textarea>
+    </section>
+
+    <section class="block grow output-block">
+      <div class="block-head">
+        <span class="block-label">النسخة المنسقة</span>
+        <button id="copy-output" class="primary" disabled>نسخ المنسق</button>
+      </div>
+      <div class="output-wrap">
+        <div
+          class="output"
+          id="output"
+          dir="auto"
+          data-placeholder="هيظهر هنا النص متنسق..."
+        ></div>
+      </div>
+    </section>
+
+    <section class="block reply-block">
+      <div class="block-head">
+        <span class="block-label"><span class="arrow">→</span>ردك لـ Claude</span>
+        <button id="clear-reply">مسح</button>
+        <button id="copy-reply" class="primary" disabled>
+          نسخ الرد<span class="kbd">⌃↵</span>
+        </button>
+      </div>
+      <textarea
+        id="reply"
+        placeholder="اكتب ردك بالعربي هنا، وبعدين انسخه و الصقه في Claude Code..."
+        spellcheck="false"
+      ></textarea>
+    </section>
+
+    <div class="status-bar" id="status"></div>
+
+  </div>
+  <script type="module" src="./editor.ts"></script>
+</body>
+</html>
