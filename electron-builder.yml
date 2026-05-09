@@ -1,0 +1,37 @@
+appId: com.growthmora.rtlfixer.v2
+productName: RTL Fixer v2
+copyright: Copyright (c) 2026 GrowthMora
+artifactName: ${productName}-${version}.${ext}
+
+directories:
+  output: dist/release
+  buildResources: assets
+
+files:
+  - dist/main/**/*
+  - dist/preload/**/*
+  - dist/renderer/**/*
+  - assets/icons/**/*
+  - package.json
+  - "!**/*.map"
+  - "!node_modules/**/*"
+
+extraMetadata:
+  main: dist/main/main.js
+
+win:
+  target:
+    - target: portable
+      arch:
+        - x64
+  icon: assets/icons/app.ico
+  artifactName: RTLFixer-v2.${ext}
+
+portable:
+  artifactName: RTLFixer-v2.exe
+  unicode: true
+
+asar: true
+compression: maximum
+
+publish: null
