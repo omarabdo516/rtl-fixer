@@ -165,12 +165,19 @@ body {
 }
 
 .tour-btn-secondary {
-  background: transparent;
+  background: oklch(96% 0.005 80);
   color: var(--fg-muted);
+  border-color: oklch(85% 0.005 80);
 }
 .tour-btn-secondary:hover {
   color: var(--fg);
   background: var(--bg);
+  border-color: var(--fg-muted);
+}
+.tour-btn-secondary:focus-visible,
+.tour-btn-primary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* F-014: respect prefers-reduced-motion */

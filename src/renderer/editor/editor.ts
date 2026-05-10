@@ -82,18 +82,31 @@ async function copyReply(): Promise<void> {
   }
 }
 
-const LAYOUT_KEY = 'rtl-fixer-layout';
-function applyLayout(rawLayout: string | null): void {
-  const layout = rawLayout === 'horizontal' ? 'horizontal' : 'vertical';
+// F-024 + F-037: layout is a radiogroup (aria-checked) and the source of
+// truth is window.api.prefs (not localStorage), so the editor and the
+// Settings panel stay in sync.
+function applyLayoutVisual(layout: 'vertical' | 'horizontal'): void {
   $app!.dataset.layout = layout;
   $layoutOpts.forEach((opt) => {
-    opt.setAttribute('aria-pressed', opt.dataset.layout === layout ? 'true' : 'false');
+    opt.setAttribute('aria-checked', opt.dataset.layout === layout ? 'true' : 'false');
   });
-  localStorage.setItem(LAYOUT_KEY, layout);
+}
+
+function selectLayout(rawLayout: string | null): void {
+  const layout = rawLayout === 'horizontal' ? 'horizontal' : 'vertical';
+  applyLayoutVisual(layout);
+  void window.api.prefs.set({ layout });
 }
 
 $layoutOpts.forEach((opt) => {
-  opt.addEventListener('click', () => applyLayout(opt.dataset.layout ?? 'vertical'));
+  opt.addEventListener('click', () => selectLayout(opt.dataset.layout ?? 'vertical'));
+});
+
+// React to prefs changes from elsewhere (e.g. Settings panel)
+window.api.prefs.onUpdated((next) => {
+  if (next.layout !== $app!.dataset.layout) {
+    applyLayoutVisual(next.layout);
+  }
 });
 
 $input.addEventListener('input', render);
@@ -133,5 +146,8 @@ if (window.api?.clipboard?.onArabicDetected) {
   });
 }
 
-applyLayout(localStorage.getItem(LAYOUT_KEY));
+// Initial layout from prefs (single source of truth)
+void window.api.prefs.get().then((prefs) => {
+  applyLayoutVisual(prefs.layout);
+});
 updateButtons();

@@ -159,6 +159,12 @@ body[data-mode="expanded"] .widget-notification { display: none; }
   50%      { opacity: 0.5; transform: scale(1.3); }
 }
 
+/* F-029: limit pulse to 3 cycles (was `infinite`). Visual noise was
+   constant. Override the animation declaration on the parent rule's count. */
+.widget-notif-dot {
+  animation-iteration-count: 3 !important;
+}
+
 .widget-notif-text {
   font-size: 0.85rem;
   font-weight: 500;

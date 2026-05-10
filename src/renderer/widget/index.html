@@ -36,14 +36,22 @@
       <span class="widget-title-spacer" aria-hidden="true"></span>
       <div class="widget-titlebar-actions">
         <button id="widget-settings-btn" class="widget-icon-btn" aria-label="الإعدادات" title="الإعدادات">⚙</button>
-        <button id="widget-pin-btn" class="widget-icon-btn" aria-label="تثبيت فوق الكل" title="تثبيت فوق الكل" aria-pressed="true">📌</button>
-        <button id="widget-collapse-btn" class="widget-icon-btn" aria-label="صغّر" title="صغّر">−</button>
+        <button id="widget-pin-btn" class="widget-icon-btn" aria-label="تثبيت فوق الكل" title="تثبيت فوق الكل" aria-pressed="true">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 1a4 4 0 0 0-4 4c0 2 4 7 4 7s4-5 4-7a4 4 0 0 0-4-4zm0 5.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+          </svg>
+        </button>
+        <button id="widget-collapse-btn" class="widget-icon-btn" aria-label="صغّر" title="صغّر">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <rect x="3" y="7" width="10" height="2" rx="1"/>
+          </svg>
+        </button>
       </div>
     </div>
     <div class="widget-editor-host">
       <div class="app" data-layout="vertical">
         <header class="header">
-          <h1>RTL <span class="accent">·</span> Fixer</h1>
+          <h1 lang="en">RTL <span class="accent">·</span> Fixer</h1>
           <div class="header-right">
             <div class="layout-switch" role="radiogroup" aria-label="تخطيط الواجهة">
               <button class="layout-opt" data-layout="vertical" role="radio" aria-checked="true" aria-label="تخطيط عمودي" title="عمودي">
@@ -60,7 +68,7 @@
                 </svg>
               </button>
             </div>
-            <span class="meta">growthmora · v2</span>
+            <span class="meta" lang="en">growthmora · v2</span>
           </div>
         </header>
 
@@ -96,7 +104,7 @@
             <span class="block-label"><span class="arrow">→</span>ردك لـ Claude</span>
             <button id="clear-reply">مسح</button>
             <button id="copy-reply" class="primary" disabled>
-              نسخ الرد<span class="kbd">⌃↵</span>
+              نسخ الرد<kbd class="kbd">⌃↵</kbd>
             </button>
           </div>
           <textarea
