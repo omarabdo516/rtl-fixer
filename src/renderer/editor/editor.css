@@ -187,10 +187,16 @@ textarea:focus {
 }
 textarea#input {
   height: 95px;
-  font-family: var(--font-mono);
-  font-size: 0.825rem;
-  line-height: 1.55;
-  direction: ltr;
+  font-family: var(--font-arabic);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  /* Default to RTL since the user's primary content is Arabic from Claude.
+     `unicode-bidi: plaintext` lets each paragraph follow its own first-strong
+     character — Arabic-first lines stay RTL; English-first lines (commit
+     hashes, code) display LTR within the same textarea. */
+  direction: rtl;
+  text-align: right;
+  unicode-bidi: plaintext;
 }
 textarea#input::placeholder {
   color: var(--fg-muted);

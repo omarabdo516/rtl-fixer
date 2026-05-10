@@ -198,23 +198,46 @@ body[data-mode="expanded"] .widget-notification { display: none; }
 }
 
 .widget-titlebar {
-  height: 24px;
-  background: transparent;
+  height: 36px;
+  background: oklch(95% 0.005 80);
+  border-bottom: 1px solid oklch(90% 0.005 80);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 0.4rem 0 0;
+  padding: 0 0.4rem;
   -webkit-app-region: drag;
   flex-shrink: 0;
 }
 
 .widget-title-spacer {
   flex: 1;
+  height: 100%;
+  /* Subtle visual indication this strip is grabbable. Three faint dots
+     centered, like a macOS-style drag handle. */
+  background-image: radial-gradient(circle at 12px center, oklch(85% 0.005 80) 1.5px, transparent 1.5px),
+                    radial-gradient(circle at 24px center, oklch(85% 0.005 80) 1.5px, transparent 1.5px),
+                    radial-gradient(circle at 36px center, oklch(85% 0.005 80) 1.5px, transparent 1.5px);
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: grab;
 }
 
 .widget-titlebar-actions {
   display: flex;
   gap: 0.25rem;
+  -webkit-app-region: no-drag;
+}
+
+/* Make any non-interactive area of the expanded card draggable too —
+   common Grammarly/Notion pattern. Interactive children opt out. */
+.widget-expanded { -webkit-app-region: no-drag; /* default for the box */ }
+.widget-expanded textarea,
+.widget-expanded button,
+.widget-expanded select,
+.widget-expanded input,
+.widget-expanded .output,
+.widget-expanded .layout-switch,
+.widget-expanded .block-head {
   -webkit-app-region: no-drag;
 }
 

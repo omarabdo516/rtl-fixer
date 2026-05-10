@@ -68,6 +68,17 @@ app
       }
     });
 
+    // Sync renderer state on every page load (initial + Ctrl+R reload).
+    // Without this, after a reload the renderer assumes mode='collapsed'
+    // while the main process may still own an 'expanded' window — visually
+    // broken (small bubble inside a big empty card).
+    widget.window.webContents.on('did-finish-load', () => {
+      if (!widget || widget.window.isDestroyed()) return;
+      const w = widget.window.webContents;
+      w.send(IPC.WIDGET_MODE_CHANGED, { mode: widget.getMode() });
+      w.send(IPC.APP_ALWAYS_ON_TOP_CHANGED, { enabled: widget.isAlwaysOnTop() });
+    });
+
     const clipboardWatcher = createClipboardWatcher({
       selfFingerprintCache,
       onArabicDetected: (event) => {
