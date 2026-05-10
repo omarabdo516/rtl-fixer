@@ -7,6 +7,7 @@
 //     external clipboard events
 
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
 const $app = document.querySelector<HTMLElement>('.app');
 const $input = document.getElementById('input') as HTMLTextAreaElement | null;
@@ -25,6 +26,22 @@ if (!$app || !$input || !$output || !$reply || !$copyOutput || !$copyReply || !$
 
 marked.setOptions({ breaks: true, gfm: true });
 
+// R2-002: clipboard content can include malicious HTML/script. Even though
+// nodeIntegration is off and contextIsolation is on, an injected script in
+// the renderer can still call window.api.* (the only exposed surface) and
+// could exfiltrate clipboard content the user is about to paste. Sanitize
+// every parse result before assigning to innerHTML.
+function safeRender(markdown: string): string {
+  const parsed = marked.parse(markdown) as string;
+  return DOMPurify.sanitize(parsed, {
+    // Allow code blocks + tables but no event handlers, no <script>, no
+    // <iframe>, no <object>. DOMPurify's default profile already strips
+    // these; the explicit hooks below are paranoid for clarity.
+    FORBID_TAGS: ['style', 'iframe', 'object', 'embed'],
+    FORBID_ATTR: ['style'],
+  });
+}
+
 function render(): void {
   const text = $input!.value;
   // Subtle in-progress hint so the user sees something happen on heavy
@@ -34,7 +51,7 @@ function render(): void {
     if (!text.trim()) {
       $output!.innerHTML = '';
     } else {
-      $output!.innerHTML = marked.parse(text) as string;
+      $output!.innerHTML = safeRender(text);
       $output!.scrollTop = 0;
     }
     $output!.classList.remove('is-loading');

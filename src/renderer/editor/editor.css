@@ -17,6 +17,24 @@
   --shadow: 0 1px 2px oklch(0% 0 0 / 0.04), 0 4px 16px oklch(0% 0 0 / 0.04);
 }
 
+/* R2-003: dark theme tokens. Activated by setting data-theme="dark" on
+   <html>; the renderer JS reads the resolved theme via the theme:* IPC
+   and toggles this attribute (also re-toggles when the OS theme changes
+   while theme: 'system' is selected). */
+:root[data-theme="dark"] {
+  --bg: oklch(16% 0.005 80);
+  --surface: oklch(20% 0.005 80);
+  --surface-2: oklch(23% 0.005 80);
+  --fg: oklch(94% 0.005 80);
+  --fg-muted: oklch(68% 0.01 80);
+  --border: oklch(30% 0.005 80);
+  --accent: oklch(68% 0.15 50);
+  --accent-hover: oklch(74% 0.15 50);
+  --accent-fg: oklch(16% 0.005 80);
+  --success: oklch(72% 0.13 145);
+  --shadow: 0 1px 2px oklch(0% 0 0 / 0.4), 0 4px 16px oklch(0% 0 0 / 0.3);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 

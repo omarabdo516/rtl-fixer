@@ -24,15 +24,24 @@ export function createTrayManager(opts: CreateTrayManagerOptions): TrayManager {
   const tray = new Tray(image);
   tray.setToolTip('RTL Fixer v2');
 
+  // R2-001: tray-driven show. The widget may be hidden (Alt+F4 was
+   // intercepted to hide-to-tray instead of close), so explicitly call
+   // .show() before setting the mode.
+  const showWidget = (mode: 'collapsed' | 'expanded'): void => {
+    if (!widget.window.isVisible()) widget.window.show();
+    if (widget.window.isMinimized()) widget.window.restore();
+    widget.setMode(mode);
+  };
+
   const buildMenu = (): Menu =>
     Menu.buildFromTemplate([
       {
         label: 'إظهار النافذة',
-        click: () => widget.setMode('expanded'),
+        click: () => showWidget('expanded'),
       },
       {
         label: 'تصغير',
-        click: () => widget.setMode('collapsed'),
+        click: () => showWidget('collapsed'),
       },
       { type: 'separator' },
       {
@@ -60,7 +69,7 @@ export function createTrayManager(opts: CreateTrayManagerOptions): TrayManager {
 
   // Single-click on the tray icon brings the widget to expanded mode.
   tray.on('click', () => {
-    widget.setMode('expanded');
+    showWidget('expanded');
   });
 
   return {

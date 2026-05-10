@@ -9,6 +9,9 @@
 // position changes to main); otherwise treat it as a click (expand).
 
 import type { WidgetMode } from '../../shared/types.js';
+import { initTheme } from '../shared/theme.js';
+
+initTheme();
 
 const $body = document.body;
 const $collapsed = document.getElementById('collapsed') as HTMLElement | null;

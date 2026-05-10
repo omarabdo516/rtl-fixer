@@ -9,6 +9,9 @@ import type {
   Theme,
   UserPreferences,
 } from '../../shared/types.js';
+import { initTheme } from '../shared/theme.js';
+
+initTheme();
 
 const HOTKEY_ACTIONS: readonly HotkeyAction[] = ['toggle', 'render', 'copyReply', 'clear'];
 

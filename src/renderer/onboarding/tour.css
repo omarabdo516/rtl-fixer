@@ -12,6 +12,17 @@
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
+:root[data-theme="dark"] {
+  --bg: oklch(16% 0.005 80);
+  --surface: oklch(20% 0.005 80);
+  --fg: oklch(94% 0.005 80);
+  --fg-muted: oklch(68% 0.01 80);
+  --border: oklch(30% 0.005 80);
+  --accent: oklch(68% 0.15 50);
+  --accent-hover: oklch(74% 0.15 50);
+  --accent-fg: oklch(16% 0.005 80);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 

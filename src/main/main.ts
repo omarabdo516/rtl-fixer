@@ -25,9 +25,14 @@ if (!gotTheLock) {
 
 let widget: WidgetWindowControl | null = null;
 let settingsWin: BrowserWindow | null = null;
+// Set true once the user has explicitly chosen to quit (tray menu, app.quit()).
+// The widget close handler uses this to decide whether to actually close
+// (true) or just hide-to-tray (false — Alt+F4 / OS close).
+let isQuitting = false;
 
 app.on('second-instance', () => {
   if (widget && !widget.window.isDestroyed()) {
+    if (!widget.window.isVisible()) widget.window.show();
     if (widget.window.isMinimized()) widget.window.restore();
     widget.window.focus();
     widget.setMode('expanded');
@@ -58,6 +63,9 @@ app
         if (widget && !widget.window.isDestroyed()) {
           widget.window.webContents.send(IPC.WIDGET_MODE_CHANGED, { mode });
         }
+        // R2-009: clear pending whenever the widget transitions to expanded
+        // (regardless of source — user click, hotkey, tray menu).
+        reactions?.notifyModeChanged(mode);
       },
     });
 
@@ -68,15 +76,24 @@ app
       }
     });
 
-    // Sync renderer state on every page load (initial + Ctrl+R reload).
-    // Without this, after a reload the renderer assumes mode='collapsed'
-    // while the main process may still own an 'expanded' window — visually
-    // broken (small bubble inside a big empty card).
+    // R2-001: intercept user-initiated close (Alt+F4, X button) — hide to
+    // tray instead of actually closing. Only the tray "إغلاق" / app.quit()
+    // path lets the close go through (isQuitting flag).
+    widget.window.on('close', (e) => {
+      if (isQuitting) return;
+      e.preventDefault();
+      widget?.window.hide();
+    });
+
+    // R2-005: rebroadcast pending notification flag on did-finish-load too,
+    // not just mode + alwaysOnTop. Without this the badge silently disappears
+    // on Ctrl+R while the 3s notification timer is still running in main.
     widget.window.webContents.on('did-finish-load', () => {
       if (!widget || widget.window.isDestroyed()) return;
       const w = widget.window.webContents;
       w.send(IPC.WIDGET_MODE_CHANGED, { mode: widget.getMode() });
       w.send(IPC.APP_ALWAYS_ON_TOP_CHANGED, { enabled: widget.isAlwaysOnTop() });
+      w.send(IPC.WIDGET_PENDING_NOTIFICATION, { hasPending: reactions.getPending() });
     });
 
     const clipboardWatcher = createClipboardWatcher({
@@ -147,6 +164,8 @@ app
     };
 
     app.on('before-quit', () => {
+      // Mark the close handler so it lets the widget actually close.
+      isQuitting = true;
       clipboardWatcher.stop();
       reactions.dispose();
       hotkeyManager.unregisterAll();
@@ -162,8 +181,9 @@ app
     app.exit(1);
   });
 
+// R2-001: do NOT quit when the widget window closes — the tray icon keeps
+// the app alive. Real quit only happens via tray "إغلاق" → app.quit() →
+// before-quit (sets isQuitting) → window close goes through.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  // intentionally empty — defeat Electron's default win32 quit-on-close.
 });

@@ -1,6 +1,10 @@
 // Three-step onboarding tour. Bound to first-launch state (loaded by
 // widgetWindow when settings.onboardingCompleted === false).
 
+import { initTheme } from '../shared/theme.js';
+
+initTheme();
+
 const TOTAL_STEPS = 3;
 
 const $steps = document.querySelectorAll<HTMLElement>('.tour-step');

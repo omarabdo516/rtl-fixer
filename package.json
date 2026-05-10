@@ -9,9 +9,11 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "concurrently -k -p \"[{name}]\" -n \"main,renderer,electron\" -c \"yellow.bold,cyan.bold,magenta.bold\" \"pnpm dev:main\" \"pnpm dev:renderer\" \"wait-on tcp:5173 && wait-on dist/main/main.js && electron .\"",
+    "predev": "pnpm build:preload && tsc -p tsconfig.main.json",
+    "dev": "concurrently -k -p \"[{name}]\" -n \"main,renderer,electron\" -c \"yellow.bold,cyan.bold,magenta.bold\" \"pnpm dev:main\" \"pnpm dev:renderer\" \"wait-on tcp:5173 && wait-on dist/main/main.js && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .\"",
     "dev:main": "tsc -p tsconfig.main.json --watch --preserveWatchOutput",
     "dev:renderer": "vite",
+    "preview": "pnpm clean && pnpm typecheck && pnpm build:main && pnpm build:preload && pnpm build:renderer && electron .",
     "build": "pnpm clean && pnpm typecheck && pnpm build:main && pnpm build:preload && pnpm build:renderer && pnpm build:exe",
     "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.preload.json --noEmit",
     "build:main": "tsc -p tsconfig.main.json",
@@ -28,14 +30,17 @@
     "icons": "powershell -ExecutionPolicy Bypass -File scripts/gen-icons.ps1"
   },
   "dependencies": {
+    "dompurify": "^3.1.0",
     "electron-store": "^10.0.0",
     "marked": "^14.1.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
+    "@types/dompurify": "^3.0.5",
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "^2.1.0",
     "concurrently": "^9.0.0",
+    "cross-env": "^7.0.3",
     "esbuild": "^0.24.0",
     "electron": "^33.0.0",
     "electron-builder": "^25.1.0",
