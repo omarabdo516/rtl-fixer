@@ -1,6 +1,6 @@
-// System tray icon and context menu (Show / Hide / Settings / Quit).
-// Settings menu item is wired to a no-op handler in Phase 4 — the actual
-// settings window lands in Phase 5 (US3).
+// System tray icon and context menu (Show / Collapse / Pin-on-top /
+// Settings / Quit). The Pin-on-top item is a togglable checkbox that
+// reflects the current alwaysOnTop state.
 
 import { app, Menu, Tray, nativeImage } from 'electron';
 import { join } from 'node:path';
@@ -12,6 +12,7 @@ export interface CreateTrayManagerOptions {
 }
 
 export interface TrayManager {
+  refresh(): void;
   destroy(): void;
 }
 
@@ -35,6 +36,15 @@ export function createTrayManager(opts: CreateTrayManagerOptions): TrayManager {
       },
       { type: 'separator' },
       {
+        label: 'تثبيت فوق كل النوافذ',
+        type: 'checkbox',
+        checked: widget.isAlwaysOnTop(),
+        click: (item) => {
+          widget.setAlwaysOnTop(item.checked);
+        },
+      },
+      { type: 'separator' },
+      {
         label: 'الإعدادات',
         enabled: onShowSettings !== undefined,
         click: () => onShowSettings?.(),
@@ -54,6 +64,9 @@ export function createTrayManager(opts: CreateTrayManagerOptions): TrayManager {
   });
 
   return {
+    refresh(): void {
+      tray.setContextMenu(buildMenu());
+    },
     destroy(): void {
       if (!tray.isDestroyed()) tray.destroy();
     },

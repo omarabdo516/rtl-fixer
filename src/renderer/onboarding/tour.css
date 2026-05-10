@@ -68,6 +68,12 @@ body {
   justify-content: center;
 }
 
+/* The user-agent default `[hidden] { display: none }` gets overridden by
+   the `display: flex` rule above on .tour-step. Force it back. */
+.tour-step[hidden] {
+  display: none;
+}
+
 .tour-emoji {
   font-size: 3rem;
   display: inline-block;

@@ -39,6 +39,8 @@ export interface WidgetWindowControl {
   getMode(): WidgetMode;
   restorePosition(): void;
   swapToWidgetShell(): void;
+  setAlwaysOnTop(enabled: boolean): void;
+  isAlwaysOnTop(): boolean;
   destroy(): void;
 }
 
@@ -99,7 +101,9 @@ export function createWidgetWindow(opts: CreateWidgetWindowOptions): WidgetWindo
     transparent: true,
     alwaysOnTop: true,
     skipTaskbar: false,
-    resizable: false,
+    resizable: true,
+    minWidth: 60,
+    minHeight: 60,
     title: 'RTL Fixer v2',
     webPreferences: {
       preload: join(__dirname, '../../preload/preload.cjs'),
@@ -244,6 +248,16 @@ export function createWidgetWindow(opts: CreateWidgetWindowOptions): WidgetWindo
     },
     restorePosition(): void {
       handleDisplayChange();
+    },
+    setAlwaysOnTop(enabled: boolean): void {
+      if (enabled) {
+        win.setAlwaysOnTop(true, 'floating');
+      } else {
+        win.setAlwaysOnTop(false);
+      }
+    },
+    isAlwaysOnTop(): boolean {
+      return win.isAlwaysOnTop();
     },
     destroy(): void {
       if (!win.isDestroyed()) win.close();

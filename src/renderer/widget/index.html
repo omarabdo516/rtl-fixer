@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,27 +13,31 @@
 </head>
 <body data-mode="collapsed">
 
-  <!-- Mode 1: Collapsed circle -->
-  <div class="widget-collapsed" id="collapsed">
-    <div class="widget-bubble">
-      <span class="widget-bubble-letter">ع</span>
-      <div class="widget-bubble-pulse" id="bubble-pulse"></div>
-      <div class="widget-bubble-badge" id="bubble-badge" hidden></div>
-    </div>
-  </div>
+  <!-- Mode 1: Collapsed circle (real <button> for keyboard reachability) -->
+  <button type="button" class="widget-collapsed" id="collapsed" aria-label="فتح RTL Fixer">
+    <span class="widget-bubble">
+      <span class="widget-bubble-letter" aria-hidden="true">ع</span>
+      <span class="widget-bubble-pulse" id="bubble-pulse" aria-hidden="true"></span>
+      <span class="widget-bubble-badge" id="bubble-badge" aria-hidden="true" hidden></span>
+    </span>
+  </button>
 
-  <!-- Mode 2: Notification bar -->
-  <div class="widget-notification" id="notification">
-    <span class="widget-notif-dot"></span>
+  <!-- Mode 2: Notification bar (real <button> for keyboard reachability) -->
+  <button type="button" class="widget-notification" id="notification" aria-label="نص جديد متاح، اضغط للعرض">
+    <span class="widget-notif-chevron" aria-hidden="true">←</span>
+    <span class="widget-notif-dot" aria-hidden="true"></span>
     <span class="widget-notif-text">نص جديد متاح — دوس عشان تشوفه</span>
-  </div>
+  </button>
 
   <!-- Mode 3: Expanded card with embedded editor -->
   <div class="widget-expanded" id="expanded">
+    <!-- Thin drag handle + settings + pin toggle + collapse. Title lives in the editor header below. -->
     <div class="widget-titlebar">
-      <span class="widget-title">RTL <span class="accent">·</span> Fixer</span>
+      <span class="widget-title-spacer" aria-hidden="true"></span>
       <div class="widget-titlebar-actions">
-        <button id="widget-collapse-btn" class="widget-icon-btn" title="طوّ النافذة">−</button>
+        <button id="widget-settings-btn" class="widget-icon-btn" aria-label="الإعدادات" title="الإعدادات">⚙</button>
+        <button id="widget-pin-btn" class="widget-icon-btn" aria-label="تثبيت/إلغاء فوق" title="تثبيت/إلغاء فوق" aria-pressed="true">📌</button>
+        <button id="widget-collapse-btn" class="widget-icon-btn" aria-label="طوّ النافذة" title="طوّ النافذة">−</button>
       </div>
     </div>
     <div class="widget-editor-host">

@@ -68,6 +68,11 @@ const api: RtlFixerApi = {
     completeOnboarding: () => ipcRenderer.invoke(IPC.APP_COMPLETE_ONBOARDING) as Promise<void>,
     openExternal: (url: string) =>
       ipcRenderer.invoke(IPC.APP_OPEN_EXTERNAL, { url }) as Promise<void>,
+    setAlwaysOnTop: (enabled: boolean) =>
+      ipcRenderer.invoke(IPC.APP_SET_ALWAYS_ON_TOP, { enabled }) as Promise<boolean>,
+    getAlwaysOnTop: () => ipcRenderer.invoke(IPC.APP_GET_ALWAYS_ON_TOP) as Promise<boolean>,
+    onAlwaysOnTopChanged: (cb) =>
+      on<{ enabled: boolean }>(IPC.APP_ALWAYS_ON_TOP_CHANGED, ({ enabled }) => cb(enabled)),
   },
   theme: {
     getResolvedTheme: () =>

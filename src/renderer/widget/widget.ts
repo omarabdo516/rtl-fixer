@@ -17,8 +17,10 @@ const $notification = document.getElementById('notification') as HTMLElement | n
 const $bubblePulse = document.getElementById('bubble-pulse') as HTMLElement | null;
 const $bubbleBadge = document.getElementById('bubble-badge') as HTMLElement | null;
 const $collapseBtn = document.getElementById('widget-collapse-btn') as HTMLButtonElement | null;
+const $pinBtn = document.getElementById('widget-pin-btn') as HTMLButtonElement | null;
+const $settingsBtn = document.getElementById('widget-settings-btn') as HTMLButtonElement | null;
 
-if (!$collapsed || !$expanded || !$notification || !$bubblePulse || !$bubbleBadge || !$collapseBtn) {
+if (!$collapsed || !$expanded || !$notification || !$bubblePulse || !$bubbleBadge || !$collapseBtn || !$pinBtn || !$settingsBtn) {
   throw new Error('widget.ts: missing required DOM elements');
 }
 
@@ -88,20 +90,32 @@ $collapsed.addEventListener('pointermove', (e: PointerEvent) => {
   }
 });
 
+// Track whether the most recent pointerup ended in a drag, so the trailing
+// `click` event (which keyboard activations also use) doesn't double-expand.
+let lastPointerWasDrag = false;
+
 $collapsed.addEventListener('pointerup', (e: PointerEvent) => {
   if (!drag) return;
   if ($collapsed!.hasPointerCapture(e.pointerId)) {
     $collapsed!.releasePointerCapture(e.pointerId);
   }
-  if (!drag.didMove) {
-    setPendingBadge(false);
-    void window.api.widget.requestExpanded();
-  }
+  lastPointerWasDrag = drag.didMove;
   drag = null;
 });
 
 $collapsed.addEventListener('pointercancel', () => {
   drag = null;
+});
+
+// Click fires on both pointer-released (no drag) and keyboard activation
+// (Enter/Space on the <button>). Skip if the pointer event was actually a drag.
+$collapsed.addEventListener('click', () => {
+  if (lastPointerWasDrag) {
+    lastPointerWasDrag = false;
+    return;
+  }
+  setPendingBadge(false);
+  void window.api.widget.requestExpanded();
 });
 
 // ─── Notification bar click → expand ─────────────────────────────
@@ -115,6 +129,34 @@ $notification.addEventListener('click', () => {
 
 $collapseBtn.addEventListener('click', () => {
   void window.api.widget.requestCollapsed();
+});
+
+// ─── Settings entry ─────────────────────────────────────────────
+
+$settingsBtn.addEventListener('click', () => {
+  void window.api.app.showSettings();
+});
+
+// ─── Pin-on-top toggle ──────────────────────────────────────────
+
+function reflectPinState(enabled: boolean): void {
+  $pinBtn!.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+  $pinBtn!.title = enabled ? 'مثبّت فوق — دوس عشان تشيل التثبيت' : 'مش مثبّت — دوس عشان تثبّت فوق';
+}
+
+$pinBtn.addEventListener('click', async () => {
+  const current = $pinBtn!.getAttribute('aria-pressed') === 'true';
+  const next = !current;
+  const actual = await window.api.app.setAlwaysOnTop(next);
+  reflectPinState(actual);
+});
+
+window.api.app.onAlwaysOnTopChanged((enabled) => {
+  reflectPinState(enabled);
+});
+
+void window.api.app.getAlwaysOnTop().then((enabled) => {
+  reflectPinState(enabled);
 });
 
 // ─── Auto-fade (collapsed only, idle 5s) ─────────────────────────

@@ -33,6 +33,9 @@ export const IPC = {
   APP_SHOW_SETTINGS: 'app:showSettings',
   APP_COMPLETE_ONBOARDING: 'app:completeOnboarding',
   APP_OPEN_EXTERNAL: 'app:openExternal',
+  APP_SET_ALWAYS_ON_TOP: 'app:setAlwaysOnTop',
+  APP_GET_ALWAYS_ON_TOP: 'app:getAlwaysOnTop',
+  APP_ALWAYS_ON_TOP_CHANGED: 'app:alwaysOnTopChanged',
 
   // Theme
   THEME_GET_RESOLVED: 'theme:getResolved',

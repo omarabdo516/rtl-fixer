@@ -103,6 +103,9 @@ export interface RtlFixerApi {
     showSettings(): Promise<void>;
     completeOnboarding(): Promise<void>;
     openExternal(url: string): Promise<void>;
+    setAlwaysOnTop(enabled: boolean): Promise<boolean>;
+    getAlwaysOnTop(): Promise<boolean>;
+    onAlwaysOnTopChanged(cb: (enabled: boolean) => void): UnsubscribeFn;
   };
   theme: {
     getResolvedTheme(): Promise<'light' | 'dark'>;

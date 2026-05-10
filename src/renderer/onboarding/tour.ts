@@ -14,6 +14,8 @@ if (!$next || !$skip) {
 
 let currentStep = 1;
 
+const $tour = document.getElementById('tour');
+
 function showStep(step: number): void {
   $steps.forEach((el) => {
     if (Number(el.dataset.step) === step) {
@@ -26,6 +28,10 @@ function showStep(step: number): void {
     dot.classList.toggle('is-active', Number(dot.dataset.stepDot) === step);
   });
   $next!.textContent = step === TOTAL_STEPS ? 'يلا نبدأ' : 'التالي';
+  // Update aria-labelledby so screen readers announce the active step heading
+  $tour?.setAttribute('aria-labelledby', `tour-step-${step}-heading`);
+  // Move focus to the primary action to keep keyboard flow tight
+  $next!.focus();
 }
 
 function complete(): void {
@@ -48,8 +54,28 @@ $skip.addEventListener('click', () => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     complete();
-  } else if (e.key === 'Enter') {
+    return;
+  }
+  if (e.key === 'Enter') {
     $next!.click();
+    return;
+  }
+  // Trap Tab inside the tour dialog (only Skip and Next are focusable)
+  if (e.key === 'Tab') {
+    const focusables = [$skip!, $next!];
+    const activeIdx = focusables.indexOf(document.activeElement as HTMLButtonElement);
+    if (activeIdx === -1) {
+      e.preventDefault();
+      $next!.focus();
+      return;
+    }
+    if (e.shiftKey && activeIdx === 0) {
+      e.preventDefault();
+      focusables[focusables.length - 1]!.focus();
+    } else if (!e.shiftKey && activeIdx === focusables.length - 1) {
+      e.preventDefault();
+      focusables[0]!.focus();
+    }
   }
 });
 

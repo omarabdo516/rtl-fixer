@@ -137,6 +137,15 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
     onOnboardingComplete();
   });
 
+  ipcMain.handle(IPC.APP_SET_ALWAYS_ON_TOP, (_event, payload: { enabled: boolean }) => {
+    widget.setAlwaysOnTop(payload.enabled);
+    const actual = widget.isAlwaysOnTop();
+    broadcast(IPC.APP_ALWAYS_ON_TOP_CHANGED, { enabled: actual });
+    return actual;
+  });
+
+  ipcMain.handle(IPC.APP_GET_ALWAYS_ON_TOP, () => widget.isAlwaysOnTop());
+
   ipcMain.handle(IPC.APP_OPEN_EXTERNAL, (_event, payload: { url: string }) => {
     let parsed: URL;
     try {

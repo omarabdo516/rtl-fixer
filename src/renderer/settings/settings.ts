@@ -128,6 +128,18 @@ for (const [action, input] of hotkeyInputs) {
   });
 
   input.addEventListener('keydown', async (e: KeyboardEvent) => {
+    // Allow Tab / Shift+Tab to leave the input naturally (don't trap keyboard
+    // users) and Escape to cancel recording.
+    if (e.key === 'Tab') {
+      input.blur();
+      return; // let default Tab navigation proceed
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      input.blur();
+      return;
+    }
+
     e.preventDefault();
     e.stopPropagation();
     const accelerator = eventToAccelerator(e);

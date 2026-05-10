@@ -43,10 +43,14 @@ body {
 .app[data-layout="horizontal"] {
   max-width: 1400px;
   display: grid;
+  /* RTL reading: output (the rendered Arabic the user reads) on the right
+     side of the visual flow, reply (the user writes) on the left. With
+     `dir="rtl"` on <html>, grid columns auto-mirror, so the source order
+     "output reply" places output in the first (right) column. */
   grid-template-areas:
     "header  header"
     "input   input"
-    "reply   output"
+    "output  reply"
     "status  status";
   grid-template-rows: auto auto 1fr auto;
   grid-template-columns: 1fr 1fr;

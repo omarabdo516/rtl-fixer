@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,29 +12,29 @@
 </head>
 <body>
 
-  <div class="tour" id="tour">
+  <div class="tour" id="tour" role="dialog" aria-modal="true" aria-labelledby="tour-active-heading">
     <div class="tour-card">
-      <div class="tour-progress">
+      <div class="tour-progress" aria-hidden="true">
         <span class="dot is-active" data-step-dot="1"></span>
         <span class="dot" data-step-dot="2"></span>
         <span class="dot" data-step-dot="3"></span>
       </div>
 
       <div class="tour-step" data-step="1">
-        <span class="tour-emoji">👋</span>
-        <h2>أهلاً بيك في RTL Fixer v2</h2>
+        <span class="tour-emoji" aria-hidden="true">👋</span>
+        <h2 id="tour-step-1-heading">أهلاً بيك في RTL Fixer v2</h2>
         <p>الـ widget الصغير ده هييجيلك العربي اللي بيطلع متلخبط من الـ terminal، يرنده صح، ويرجّع ردّك للـ clipboard في خطوة واحدة.</p>
       </div>
 
       <div class="tour-step" data-step="2" hidden>
-        <span class="tour-emoji">📋</span>
-        <h2>انسخ تلقائي</h2>
+        <span class="tour-emoji" aria-hidden="true">📋</span>
+        <h2 id="tour-step-2-heading">انسخ تلقائي</h2>
         <p>أي عربي تنسخه من أي تطبيق هيظهر في الـ widget في أقل من ثانية. الدائرة الصغيرة هتـ pulse + شارة حمرا تطلع لما يكون عندك نص جديد.</p>
       </div>
 
       <div class="tour-step" data-step="3" hidden>
-        <span class="tour-emoji">⌨️</span>
-        <h2>الـ Hotkeys (اختياري)</h2>
+        <span class="tour-emoji" aria-hidden="true">⌨️</span>
+        <h2 id="tour-step-3-heading">الـ Hotkeys (اختياري)</h2>
         <p>من أي مكان: <code>Ctrl+Shift+R</code> توسيع/تصغير الـ widget، <code>Ctrl+Shift+V</code> رندر آخر نسخ، <code>Ctrl+Shift+C</code> نسخ الرد، <code>Ctrl+Shift+X</code> مسح الكل. كل واحدة تقدر تغيّرها من الـ Settings.</p>
       </div>
 

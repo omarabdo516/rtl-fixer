@@ -32,8 +32,18 @@ body[data-mode="expanded"] .widget-notification { display: none; }
   position: relative;
   user-select: none;
   -webkit-user-select: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: block;
 }
 .widget-collapsed:active { cursor: grabbing; }
+.widget-collapsed:focus-visible {
+  outline: 2px solid oklch(58% 0.13 50);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
 
 .widget-bubble {
   width: 100%;
@@ -116,6 +126,24 @@ body[data-mode="expanded"] .widget-notification { display: none; }
   user-select: none;
   -webkit-user-select: none;
   border: 1px solid oklch(90% 0.005 80);
+  font-family: inherit;
+  color: inherit;
+  transition: transform 150ms ease, background 150ms ease;
+}
+.widget-notification:hover {
+  background: oklch(99% 0 0);
+  transform: translateX(-3px);
+}
+.widget-notification:focus-visible {
+  outline: 2px solid oklch(58% 0.13 50);
+  outline-offset: 3px;
+}
+
+.widget-notif-chevron {
+  font-size: 1.1rem;
+  color: oklch(58% 0.13 50);
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .widget-notif-dot {
@@ -164,25 +192,19 @@ body[data-mode="expanded"] .widget-notification { display: none; }
 }
 
 .widget-titlebar {
-  height: 32px;
-  background: oklch(96% 0.005 80);
-  border-bottom: 1px solid oklch(90% 0.005 80);
+  height: 24px;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 0.6rem 0 1rem;
+  padding: 0 0.4rem 0 0;
   -webkit-app-region: drag;
   flex-shrink: 0;
 }
 
-.widget-title {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: oklch(20% 0.01 80);
-  letter-spacing: 0.04em;
+.widget-title-spacer {
+  flex: 1;
 }
-.widget-title .accent { color: oklch(58% 0.13 50); }
 
 .widget-titlebar-actions {
   display: flex;
@@ -206,6 +228,11 @@ body[data-mode="expanded"] .widget-notification { display: none; }
   transition: background 120ms ease, color 120ms ease;
 }
 .widget-icon-btn:hover { background: oklch(90% 0.005 80); color: oklch(20% 0.01 80); }
+
+.widget-icon-btn[aria-pressed="false"] {
+  opacity: 0.4;
+  filter: grayscale(0.6);
+}
 
 .widget-editor-host {
   flex: 1;
