@@ -1,3 +1,10 @@
+// R2-037: vitest unit tests run in pure node — no Electron, no built dist.
+// Each test imports source modules directly (src/main/services/* and
+// src/shared/*) and runs without needing `pnpm build:main` first. If a unit
+// test ever needs `dist/` artifacts, it should move to tests/e2e/* instead.
+// This is intentionally NOT in lockstep with the e2e suite, which DOES need
+// the full Electron build to drive the app via @playwright/test.
+
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'node:path';
 

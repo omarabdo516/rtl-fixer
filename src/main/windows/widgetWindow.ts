@@ -23,7 +23,9 @@ const __dirname = dirname(__filename);
 const SIZES: Record<WidgetMode, WidgetSize> = {
   collapsed: { width: 60, height: 60 },
   notification: { width: 240, height: 60 },
-  expanded: { width: 720, height: 600 },
+  // R2-034: 720×600 was tight for 30+ line code pastes. 760×680 gives roughly
+  // one extra paragraph of headroom; users can still drag the corner smaller.
+  expanded: { width: 760, height: 680 },
 };
 
 const TOUR_SIZE: WidgetSize = { width: 480, height: 640 };
@@ -70,6 +72,18 @@ export function createWidgetWindow(opts: CreateWidgetWindowOptions): WidgetWindo
   const workAreas = allDisplays.map(workAreaToData);
   const primaryArea = workAreaToData(primary);
 
+  // R2-035: on first launch the user's attention is wherever the cursor is.
+  // Look that up so multi-monitor folks see the widget appear on the screen
+  // they're actually using. Wrapped in try/catch because getCursorScreenPoint
+  // can throw on some virtualized displays.
+  let cursorArea: DisplayWorkArea | undefined;
+  try {
+    const cursorPoint = screen.getCursorScreenPoint();
+    cursorArea = workAreaToData(screen.getDisplayNearestPoint(cursorPoint));
+  } catch {
+    cursorArea = undefined;
+  }
+
   const persisted = settingsStore.get();
   const onboardingDone = persisted.onboardingCompleted;
 
@@ -82,8 +96,9 @@ export function createWidgetWindow(opts: CreateWidgetWindowOptions): WidgetWindo
         size: SIZES.collapsed,
         workAreas,
         primaryWorkArea: primaryArea,
+        ...(cursorArea !== undefined ? { firstLaunchPreferredArea: cursorArea } : {}),
       }).position
-    : centeredPosition(primaryArea, TOUR_SIZE);
+    : centeredPosition(cursorArea ?? primaryArea, TOUR_SIZE);
 
   let currentMode: WidgetMode = 'collapsed';
   // Skip the move debounce while we're applying programmatic bounds changes

@@ -22,7 +22,9 @@ export function createTrayManager(opts: CreateTrayManagerOptions): TrayManager {
   const image = nativeImage.createFromPath(iconPath);
 
   const tray = new Tray(image);
-  tray.setToolTip('RTL Fixer v2');
+  // R2-033: bilingual tooltip — Arabic primary, English subtitle so screen
+  // sharers / non-Arabic onlookers immediately understand what the icon is.
+  tray.setToolTip('RTL Fixer — كليك للإظهار · يمين للقائمة\nClick to show · right-click for menu');
 
   // R2-001: tray-driven show. The widget may be hidden (Alt+F4 was
    // intercepted to hide-to-tray instead of close), so explicitly call

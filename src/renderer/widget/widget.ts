@@ -58,8 +58,16 @@ function pulse(): void {
 }
 
 function setPendingBadge(visible: boolean): void {
+  const wasHidden = $bubbleBadge!.hasAttribute('hidden');
   if (visible) {
     $bubbleBadge!.removeAttribute('hidden');
+    // R2-031: announce only on the rising edge (hidden → visible). Without
+    // the wasHidden gate, repeated `pending=true` IPC events would re-fire
+    // the announcement and produce a stuttering screen-reader experience.
+    if (wasHidden) {
+      const $live = document.getElementById('widget-live');
+      if ($live) $live.textContent = 'نص جديد متاح';
+    }
   } else {
     $bubbleBadge!.setAttribute('hidden', '');
   }

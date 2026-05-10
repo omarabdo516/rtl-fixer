@@ -87,6 +87,11 @@ export interface ResolvePositionInput {
   size: WidgetSize;
   workAreas: DisplayWorkArea[];
   primaryWorkArea: DisplayWorkArea;
+  // R2-035: on first launch (sentinel position), prefer this work area over
+  // the primary monitor when supplied. The caller derives this from
+  // screen.getCursorScreenPoint() so multi-monitor users see the widget
+  // appear on the screen they're actually working on.
+  firstLaunchPreferredArea?: DisplayWorkArea;
 }
 
 export interface ResolvePositionResult {
@@ -98,19 +103,21 @@ const FIRST_LAUNCH_SENTINEL_X = -1;
 const FIRST_LAUNCH_SENTINEL_Y = -1;
 
 export function resolveStartupPosition(input: ResolvePositionInput): ResolvePositionResult {
-  const { saved, size, workAreas, primaryWorkArea } = input;
-  const fallback = defaultBottomRightPosition(primaryWorkArea, size);
+  const { saved, size, workAreas, primaryWorkArea, firstLaunchPreferredArea } = input;
+  const firstLaunchArea = firstLaunchPreferredArea ?? primaryWorkArea;
+  const firstLaunchFallback = defaultBottomRightPosition(firstLaunchArea, size);
+  const recoveryFallback = defaultBottomRightPosition(primaryWorkArea, size);
 
   if (
     saved === null ||
     (saved.x === FIRST_LAUNCH_SENTINEL_X && saved.y === FIRST_LAUNCH_SENTINEL_Y)
   ) {
-    return { position: fallback, reason: 'default-first-launch' };
+    return { position: firstLaunchFallback, reason: 'default-first-launch' };
   }
 
   if (isPositionVisible(saved, size, workAreas)) {
     return { position: saved, reason: 'restored' };
   }
 
-  return { position: fallback, reason: 'recovered-monitor-disconnected' };
+  return { position: recoveryFallback, reason: 'recovered-monitor-disconnected' };
 }

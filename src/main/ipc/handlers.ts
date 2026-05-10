@@ -3,6 +3,7 @@
 
 import { ipcMain, BrowserWindow, clipboard, app, shell, nativeTheme } from 'electron';
 import { IPC } from '../../shared/ipc-channels.js';
+import { ALLOWED_EXTERNAL_URL_HOSTS } from '../../shared/external-urls.js';
 import type { SettingsStore } from '../services/settingsStore.js';
 import type { ClipboardWatcher } from '../services/clipboardWatcher.js';
 import type { SelfFingerprintCache } from '../services/selfFingerprintCache.js';
@@ -18,8 +19,6 @@ import type {
   UserPreferences,
   WidgetMode,
 } from '../../shared/types.js';
-
-const ALLOWED_EXTERNAL_URL_HOSTS = new Set(['github.com', 'rspaac.com']);
 
 export interface IpcHandlerDeps {
   settingsStore: SettingsStore;

@@ -305,7 +305,15 @@ body[data-mode="expanded"] .widget-notification { display: none; }
   outline-offset: 2px;
 }
 
-.widget-icon-btn[aria-pressed="false"] {
+/* R2-030: pin button uses SVG swap (filled vs outline) instead of the
+   previous opacity-dim. Each path is `display:none` unless its state matches.
+   Falls back to the dimming pattern for any other icon button that uses
+   aria-pressed (none ship today, but cheap defense). */
+.pin-btn .pin-icon { display: none; }
+.pin-btn[aria-pressed="true"]  .pin-icon-filled  { display: inline-block; }
+.pin-btn[aria-pressed="false"] .pin-icon-outline { display: inline-block; }
+.pin-btn[aria-pressed="false"] { color: var(--fg-muted, oklch(40% 0.01 80)); }
+.widget-icon-btn:not(.pin-btn)[aria-pressed="false"] {
   opacity: 0.4;
   filter: grayscale(0.6);
 }

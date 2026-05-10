@@ -106,6 +106,15 @@ app
       },
     });
 
+    // R2-036: hotkey triggers fire from globalShortcut (main process) and
+    // get forwarded to the renderer via webContents.send. If the renderer is
+    // mid-reload (e.g. user just hit Ctrl+R), webContents.send still queues
+    // the message but only ONE per channel — successive fires during the
+    // ~200ms reload window are coalesced. We treat that as acceptable: the
+    // user gets one action delivered post-reload, which is the same shape
+    // they'd see if they'd pressed once. A multi-event buffer would also
+    // need ordering rules vs onModeChanged that fire from did-finish-load.
+    // Revisit only if user reports lost keystrokes during reload.
     const hotkeyManager = createHotkeyManager({
       bindings: settingsStore.get().hotkeys,
       onTriggered: (action) => {
