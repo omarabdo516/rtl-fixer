@@ -36,8 +36,8 @@
       <span class="widget-title-spacer" aria-hidden="true"></span>
       <div class="widget-titlebar-actions">
         <button id="widget-settings-btn" class="widget-icon-btn" aria-label="الإعدادات" title="الإعدادات">⚙</button>
-        <button id="widget-pin-btn" class="widget-icon-btn" aria-label="تثبيت/إلغاء فوق" title="تثبيت/إلغاء فوق" aria-pressed="true">📌</button>
-        <button id="widget-collapse-btn" class="widget-icon-btn" aria-label="طوّ النافذة" title="طوّ النافذة">−</button>
+        <button id="widget-pin-btn" class="widget-icon-btn" aria-label="تثبيت فوق الكل" title="تثبيت فوق الكل" aria-pressed="true">📌</button>
+        <button id="widget-collapse-btn" class="widget-icon-btn" aria-label="صغّر" title="صغّر">−</button>
       </div>
     </div>
     <div class="widget-editor-host">
@@ -45,15 +45,15 @@
         <header class="header">
           <h1>RTL <span class="accent">·</span> Fixer</h1>
           <div class="header-right">
-            <div class="layout-switch" role="group" aria-label="بدّل التخطيط">
-              <button class="layout-opt" data-layout="vertical" aria-pressed="true" title="عمودي">
+            <div class="layout-switch" role="radiogroup" aria-label="تخطيط الواجهة">
+              <button class="layout-opt" data-layout="vertical" role="radio" aria-checked="true" aria-label="تخطيط عمودي" title="عمودي">
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                   <rect x="2" y="3"  width="12" height="2" rx="0.5"/>
                   <rect x="2" y="7"  width="12" height="2" rx="0.5"/>
                   <rect x="2" y="11" width="12" height="2" rx="0.5"/>
                 </svg>
               </button>
-              <button class="layout-opt" data-layout="horizontal" aria-pressed="false" title="أفقي">
+              <button class="layout-opt" data-layout="horizontal" role="radio" aria-checked="false" aria-label="تخطيط أفقي" title="أفقي">
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                   <rect x="2" y="3"  width="5"  height="10" rx="0.5"/>
                   <rect x="9" y="3"  width="5"  height="10" rx="0.5"/>
@@ -79,7 +79,7 @@
         <section class="block grow output-block">
           <div class="block-head">
             <span class="block-label">النسخة المنسقة</span>
-            <button id="copy-output" class="primary" disabled>نسخ المنسق</button>
+            <button id="copy-output" class="primary" disabled>انسخ النص</button>
           </div>
           <div class="output-wrap">
             <div
@@ -106,10 +106,13 @@
           ></textarea>
         </section>
 
-        <div class="status-bar" id="status"></div>
+        <div class="status-bar" id="status" role="status" aria-live="polite"></div>
       </div>
     </div>
   </div>
+
+  <!-- Off-screen live region for widget mode change announcements -->
+  <div id="widget-live" class="sr-only" role="status" aria-live="polite"></div>
 
   <script type="module" src="./widget.ts"></script>
   <script type="module" src="../editor/editor.ts"></script>

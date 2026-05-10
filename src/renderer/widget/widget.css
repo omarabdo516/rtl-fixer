@@ -213,11 +213,11 @@ body[data-mode="expanded"] .widget-notification { display: none; }
 }
 
 .widget-icon-btn {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border: none;
   background: transparent;
-  color: oklch(45% 0.01 80);
+  color: oklch(40% 0.01 80);
   cursor: pointer;
   border-radius: 4px;
   font-size: 1.1rem;
@@ -228,6 +228,10 @@ body[data-mode="expanded"] .widget-notification { display: none; }
   transition: background 120ms ease, color 120ms ease;
 }
 .widget-icon-btn:hover { background: oklch(90% 0.005 80); color: oklch(20% 0.01 80); }
+.widget-icon-btn:focus-visible {
+  outline: 2px solid oklch(58% 0.13 50);
+  outline-offset: 2px;
+}
 
 .widget-icon-btn[aria-pressed="false"] {
   opacity: 0.4;
@@ -278,6 +282,19 @@ body[data-mode="expanded"] .widget-notification { display: none; }
 }
 .widget-editor-host .output-wrap {
   height: 220px;
+}
+
+/* Visually-hidden but readable by screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ─── Auto-fade (collapsed mode only) ──────────────────────────── */

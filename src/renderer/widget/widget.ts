@@ -37,6 +37,14 @@ function setMode(mode: WidgetMode): void {
   if (mode === 'collapsed') {
     schedulePossibleFade();
   }
+  // Announce mode change to screen readers via the off-screen live region.
+  const $live = document.getElementById('widget-live');
+  if ($live) {
+    $live.textContent =
+      mode === 'expanded' ? 'النافذة مفتوحة' :
+      mode === 'collapsed' ? 'النافذة مطوية' :
+      'نص جديد متاح';
+  }
 }
 
 function pulse(): void {
@@ -141,7 +149,9 @@ $settingsBtn.addEventListener('click', () => {
 
 function reflectPinState(enabled: boolean): void {
   $pinBtn!.setAttribute('aria-pressed', enabled ? 'true' : 'false');
-  $pinBtn!.title = enabled ? 'مثبّت فوق — دوس عشان تشيل التثبيت' : 'مش مثبّت — دوس عشان تثبّت فوق';
+  const label = enabled ? 'مثبّت فوق — دوس عشان تشيل التثبيت' : 'مش مثبّت — دوس عشان تثبّت فوق';
+  $pinBtn!.title = label;
+  $pinBtn!.setAttribute('aria-label', label);
 }
 
 $pinBtn.addEventListener('click', async () => {

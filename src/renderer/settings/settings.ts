@@ -179,3 +179,28 @@ window.api.hotkeys.onConflict((action) => {
   if (input) input.classList.add('is-error');
   setStatus(`اختصار ${ACTION_LABELS[action]} محجوز — غيّره من فضلك`, 'error');
 });
+
+// ─── Footer: Done + Reset to defaults ───────────────────────────
+
+const $closeBtn = document.getElementById('settings-close') as HTMLButtonElement | null;
+const $resetBtn = document.getElementById('settings-reset') as HTMLButtonElement | null;
+
+$closeBtn?.addEventListener('click', () => {
+  window.close();
+});
+
+$resetBtn?.addEventListener('click', async () => {
+  // eslint-disable-next-line no-alert
+  if (!confirm('تأكيد: هترجع كل الإعدادات للافتراضي؟')) return;
+  await window.api.prefs.set({
+    theme: 'system',
+    layout: 'vertical',
+    hotkeys: {
+      toggle: 'Control+Shift+R',
+      render: 'Control+Shift+V',
+      copyReply: 'Control+Shift+C',
+      clear: 'Control+Shift+X',
+    },
+  });
+  setStatus('اتعملت إعادة تعيين', 'success');
+});

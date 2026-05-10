@@ -27,13 +27,19 @@ marked.setOptions({ breaks: true, gfm: true });
 
 function render(): void {
   const text = $input!.value;
-  if (!text.trim()) {
-    $output!.innerHTML = '';
-  } else {
-    $output!.innerHTML = marked.parse(text) as string;
-    $output!.scrollTop = 0;
-  }
-  updateButtons();
+  // Subtle in-progress hint so the user sees something happen on heavy
+  // pastes (the parse + DOM swap can hitch on multi-KB markdown blobs).
+  $output!.classList.add('is-loading');
+  requestAnimationFrame(() => {
+    if (!text.trim()) {
+      $output!.innerHTML = '';
+    } else {
+      $output!.innerHTML = marked.parse(text) as string;
+      $output!.scrollTop = 0;
+    }
+    $output!.classList.remove('is-loading');
+    updateButtons();
+  });
 }
 
 function updateButtons(): void {
@@ -61,7 +67,7 @@ async function copyOutput(): Promise<void> {
     await window.api.clipboard.writeFormatted($output!.innerHTML, text);
     setStatus('اتنسخ منسق — الصقه في Word / Notion / Gmail', 'success');
   } catch {
-    setStatus('فشل النسخ');
+    setStatus('النسخ ما تمّش — جرّب تاني');
   }
 }
 
@@ -72,7 +78,7 @@ async function copyReply(): Promise<void> {
     await window.api.clipboard.writeReply(text);
     setStatus('الرد اتنسخ — الصقه في Claude Code', 'success');
   } catch {
-    setStatus('فشل النسخ');
+    setStatus('النسخ ما تمّش — جرّب تاني');
   }
 }
 

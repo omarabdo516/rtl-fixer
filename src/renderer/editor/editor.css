@@ -3,7 +3,7 @@
   --surface: oklch(96% 0.005 80);
   --surface-2: oklch(99.5% 0 0);
   --fg: oklch(20% 0.01 80);
-  --fg-muted: oklch(45% 0.01 80);
+  --fg-muted: oklch(40% 0.01 80);
   --border: oklch(90% 0.005 80);
   --accent: oklch(58% 0.13 50);
   --accent-hover: oklch(52% 0.13 50);
@@ -275,10 +275,21 @@ button .kbd {
   line-height: 1.85;
   color: var(--fg);
 }
+.output:empty {
+  display: grid;
+  place-items: center;
+}
 .output:empty::before {
   content: attr(data-placeholder);
   color: var(--fg-muted);
   font-style: italic;
+  opacity: 0.6;
+}
+
+/* Subtle "rendering" hint while marked.parse runs on the next frame. */
+.output.is-loading {
+  opacity: 0.5;
+  transition: opacity 100ms ease;
 }
 .output > *:first-child { margin-top: 0; }
 .output > *:last-child { margin-bottom: 0; }
