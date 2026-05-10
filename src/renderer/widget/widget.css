@@ -245,17 +245,29 @@ body[data-mode="expanded"] .widget-notification { display: none; }
 }
 
 .widget-editor-host {
-  flex: 1;
-  overflow: hidden;
+  flex: 1 1 0;
+  min-height: 0; /* allow flex item to shrink below content size */
+  overflow-y: auto; /* scroll when content > window height */
+  overflow-x: hidden;
   position: relative;
-  /* The editor's body padding compensates here */
 }
 
+/* Custom scrollbar — subtle, RTL-aware (browser puts it on the left for RTL). */
+.widget-editor-host::-webkit-scrollbar { width: 8px; }
+.widget-editor-host::-webkit-scrollbar-track { background: transparent; }
+.widget-editor-host::-webkit-scrollbar-thumb {
+  background: oklch(85% 0.005 80);
+  border-radius: 4px;
+}
+.widget-editor-host::-webkit-scrollbar-thumb:hover { background: oklch(70% 0.005 80); }
+
 /* Override editor body styling so it sits inside the host instead of
-   filling the page. */
+   filling the page. Min-height keeps the flex children behaving when the
+   window is large; content can grow beyond it and the host scrolls. */
 .widget-editor-host .app {
-  height: 100%;
-  padding: 1rem 1.4rem;
+  height: auto;
+  min-height: 100%;
+  padding: 0.75rem 1.2rem 0.75rem;
 }
 
 /* F-009: Hide the editor's brand title and meta text when embedded inside
@@ -275,19 +287,25 @@ body[data-mode="expanded"] .widget-notification { display: none; }
    reading. Give reply the flexible space, output a fixed comfortable
    minimum. Reverses the v1 priority. */
 .widget-editor-host .reply-block {
-  flex: 1;
-  min-height: 200px;
+  flex: 1 1 auto;
+  min-height: 160px;
 }
 .widget-editor-host .reply-block textarea#reply {
   flex: 1;
   height: auto;
-  min-height: 0;
+  min-height: 120px;
 }
 .widget-editor-host .output-block {
   flex: 0 0 auto;
 }
 .widget-editor-host .output-wrap {
-  height: 220px;
+  height: 180px;
+}
+
+/* Smaller default input height to leave room for the rest. User can still
+   write multi-line — the textarea grows on its own scroll. */
+.widget-editor-host textarea#input {
+  height: 70px;
 }
 
 /* Visually-hidden but readable by screen readers. */
