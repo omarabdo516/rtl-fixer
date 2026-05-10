@@ -1,11 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>RTL Fixer v2 — onboarding</title>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; connect-src 'self'">
+  <title>أهلاً بيك في RTL Fixer v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./tour.css">
 </head>
 <body>
-  <p>Onboarding tour placeholder — implemented in Phase 5 (User Story 3).</p>
+
+  <div class="tour" id="tour">
+    <div class="tour-card">
+      <div class="tour-progress">
+        <span class="dot is-active" data-step-dot="1"></span>
+        <span class="dot" data-step-dot="2"></span>
+        <span class="dot" data-step-dot="3"></span>
+      </div>
+
+      <div class="tour-step" data-step="1">
+        <span class="tour-emoji">👋</span>
+        <h2>أهلاً بيك في RTL Fixer v2</h2>
+        <p>الـ widget الصغير ده هييجيلك العربي اللي بيطلع متلخبط من الـ terminal، يرنده صح، ويرجّع ردّك للـ clipboard في خطوة واحدة.</p>
+      </div>
+
+      <div class="tour-step" data-step="2" hidden>
+        <span class="tour-emoji">📋</span>
+        <h2>انسخ تلقائي</h2>
+        <p>أي عربي تنسخه من أي تطبيق هيظهر في الـ widget في أقل من ثانية. الدائرة الصغيرة هتـ pulse + شارة حمرا تطلع لما يكون عندك نص جديد.</p>
+      </div>
+
+      <div class="tour-step" data-step="3" hidden>
+        <span class="tour-emoji">⌨️</span>
+        <h2>الـ Hotkeys (اختياري)</h2>
+        <p>من أي مكان: <code>Ctrl+Shift+R</code> توسيع/تصغير الـ widget، <code>Ctrl+Shift+V</code> رندر آخر نسخ، <code>Ctrl+Shift+C</code> نسخ الرد، <code>Ctrl+Shift+X</code> مسح الكل. كل واحدة تقدر تغيّرها من الـ Settings.</p>
+      </div>
+
+      <div class="tour-actions">
+        <button class="tour-btn-secondary" id="tour-skip">تخطّي</button>
+        <button class="tour-btn-primary" id="tour-next">التالي</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./tour.ts"></script>
 </body>
 </html>

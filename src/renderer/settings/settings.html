@@ -1,11 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>RTL Fixer v2 — settings</title>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; connect-src 'self'">
+  <title>الإعدادات — RTL Fixer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./settings.css">
 </head>
 <body>
-  <p>Settings placeholder — implemented in Phase 5 (User Story 3).</p>
+  <main class="settings">
+    <header>
+      <h1>الإعدادات</h1>
+      <p class="subtitle">عدّل الـ Hotkeys، الـ theme، والـ autostart</p>
+    </header>
+
+    <section class="group">
+      <h2>الـ Hotkeys</h2>
+      <p class="hint">دوس على الـ field واضغط الـ combo الجديد. كل combo لازم يحتوي modifier (Ctrl / Alt / Shift) + key.</p>
+
+      <div class="hotkey-row">
+        <label for="hk-toggle">إظهار/إخفاء الـ widget</label>
+        <input type="text" id="hk-toggle" data-action="toggle" readonly placeholder="Control+Shift+R">
+      </div>
+      <div class="hotkey-row">
+        <label for="hk-render">رندر الـ clipboard الحالي</label>
+        <input type="text" id="hk-render" data-action="render" readonly placeholder="Control+Shift+V">
+      </div>
+      <div class="hotkey-row">
+        <label for="hk-copy">نسخ الرد</label>
+        <input type="text" id="hk-copy" data-action="copyReply" readonly placeholder="Control+Shift+C">
+      </div>
+      <div class="hotkey-row">
+        <label for="hk-clear">مسح الكل</label>
+        <input type="text" id="hk-clear" data-action="clear" readonly placeholder="Control+Shift+X">
+      </div>
+    </section>
+
+    <section class="group">
+      <h2>المظهر</h2>
+      <div class="setting-row">
+        <label for="theme-select">الـ Theme</label>
+        <select id="theme-select">
+          <option value="light">فاتح</option>
+          <option value="dark">داكن</option>
+          <option value="system">حسب النظام</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <label for="layout-select">التخطيط الافتراضي</label>
+        <select id="layout-select">
+          <option value="vertical">عمودي</option>
+          <option value="horizontal">أفقي</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="group">
+      <h2>التشغيل</h2>
+      <div class="setting-row toggle-row">
+        <label for="autostart-toggle">تشغيل تلقائي مع Windows</label>
+        <input type="checkbox" id="autostart-toggle">
+      </div>
+    </section>
+
+    <div class="status-bar" id="status" role="status" aria-live="polite"></div>
+  </main>
+
+  <script type="module" src="./settings.ts"></script>
 </body>
 </html>

@@ -1,27 +1,17 @@
-// E2E for User Story 1 edge case: rapid successive copies should result
-// in the editor reflecting only the most recent content (no flicker, no
-// queueing artifacts).
+// E2E for User Story 1 edge case: rapid successive copies.
 
-import { test, expect, _electron as electron, type ElectronApplication, type Page } from '@playwright/test';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { test, expect } from '@playwright/test';
+import { launchWithSettings, type LaunchedApp } from './_helpers.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const APP_ENTRY = join(__dirname, '../../dist/main/main.js');
-
-let app: ElectronApplication;
-let page: Page;
+let env: LaunchedApp;
 
 test.beforeEach(async () => {
-  app = await electron.launch({ args: [APP_ENTRY], timeout: 15_000 });
-  page = await app.firstWindow({ timeout: 10_000 });
-  await page.waitForLoadState('domcontentloaded');
-  await page.waitForSelector('#input', { state: 'attached', timeout: 5_000 });
+  env = await launchWithSettings();
+  await env.page.waitForSelector('#input', { state: 'attached', timeout: 5_000 });
 });
 
 test.afterEach(async () => {
-  await app.close();
+  await env.cleanup();
 });
 
 test('rapid Arabic clipboard changes settle on the most recent value', async () => {
@@ -34,15 +24,14 @@ test('rapid Arabic clipboard changes settle on the most recent value', async () 
   ];
 
   for (const text of samples) {
-    await app.evaluate(({ clipboard }, t) => clipboard.writeText(t), text);
-    await page.waitForTimeout(120); // faster than the 500ms poll
+    await env.app.evaluate(({ clipboard }, t) => clipboard.writeText(t), text);
+    await env.page.waitForTimeout(120);
   }
 
-  // Settle: wait for at least one poll cycle after the last write.
-  await expect(page.locator('#input')).toHaveValue(samples[samples.length - 1] ?? '', {
+  await expect(env.page.locator('#input')).toHaveValue(samples[samples.length - 1] ?? '', {
     timeout: 2_000,
   });
 
-  const inputValue = await page.locator('#input').inputValue();
+  const inputValue = await env.page.locator('#input').inputValue();
   expect(inputValue).toBe(samples[samples.length - 1]);
 });

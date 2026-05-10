@@ -1,0 +1,137 @@
+:root {
+  --bg: oklch(98% 0.005 80);
+  --surface: oklch(99.5% 0 0);
+  --fg: oklch(20% 0.01 80);
+  --fg-muted: oklch(45% 0.01 80);
+  --border: oklch(90% 0.005 80);
+  --accent: oklch(58% 0.13 50);
+  --accent-hover: oklch(52% 0.13 50);
+  --accent-fg: oklch(99% 0 0);
+  --radius: 0.6rem;
+  --font-arabic: 'Tajawal', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-arabic);
+  direction: rtl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.tour {
+  width: 100%;
+  max-width: 540px;
+}
+
+.tour-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow:
+    0 8px 24px oklch(0% 0 0 / 0.06),
+    0 2px 6px oklch(0% 0 0 / 0.04);
+  padding: 2rem 1.75rem 1.5rem;
+}
+
+.tour-progress {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1.75rem;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 200ms ease, transform 200ms ease;
+}
+.dot.is-active {
+  background: var(--accent);
+  transform: scale(1.3);
+}
+
+.tour-step {
+  text-align: center;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.tour-emoji {
+  font-size: 3rem;
+  display: inline-block;
+  margin-bottom: 0.75rem;
+}
+
+.tour-step h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.7rem;
+}
+
+.tour-step p {
+  font-size: 0.95rem;
+  color: var(--fg-muted);
+  line-height: 1.7;
+  max-width: 38ch;
+}
+
+.tour-step code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--bg);
+  padding: 0.1em 0.4em;
+  border-radius: 0.25rem;
+  color: var(--accent);
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+.tour-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
+
+.tour-btn-primary,
+.tour-btn-secondary {
+  padding: 0.55rem 1.4rem;
+  font-family: var(--font-arabic);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  transition: all 150ms ease;
+  border: 1px solid var(--border);
+}
+
+.tour-btn-primary {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
+}
+.tour-btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.tour-btn-secondary {
+  background: transparent;
+  color: var(--fg-muted);
+}
+.tour-btn-secondary:hover {
+  color: var(--fg);
+  background: var(--bg);
+}

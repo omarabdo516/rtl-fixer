@@ -33,6 +33,7 @@ export interface WidgetWindowControl {
   setMode(mode: WidgetMode): void;
   getMode(): WidgetMode;
   restorePosition(): void;
+  swapToWidgetShell(): void;
   destroy(): void;
 }
 
@@ -90,10 +91,13 @@ export function createWidgetWindow(opts: CreateWidgetWindowOptions): WidgetWindo
   // makes it stick reliably.
   win.setAlwaysOnTop(true, 'pop-up-menu');
 
+  const onboardingDone = persisted.onboardingCompleted;
+  const initialEntry = onboardingDone ? 'widget/index.html' : 'onboarding/tour.html';
+
   if (opts.devServerUrl) {
-    void win.loadURL(`${opts.devServerUrl}/widget/index.html`);
+    void win.loadURL(`${opts.devServerUrl}/${initialEntry}`);
   } else {
-    void win.loadFile(join(__dirname, '../../renderer/widget/index.html'));
+    void win.loadFile(join(__dirname, '../../renderer', initialEntry));
   }
 
   win.once('ready-to-show', () => {
@@ -162,6 +166,14 @@ export function createWidgetWindow(opts: CreateWidgetWindowOptions): WidgetWindo
 
   return {
     window: win,
+    swapToWidgetShell(): void {
+      const opts2 = opts;
+      if (opts2.devServerUrl) {
+        void win.loadURL(`${opts2.devServerUrl}/widget/index.html`);
+      } else {
+        void win.loadFile(join(__dirname, '../../renderer/widget/index.html'));
+      }
+    },
     setMode(mode: WidgetMode): void {
       if (mode === currentMode) return;
       const prev = currentMode;

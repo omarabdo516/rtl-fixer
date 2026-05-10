@@ -1,16 +1,20 @@
-// Electron main entry point.
-// Phase 4 wiring adds widget mode reactions, tray icon, and widget IPC
-// handlers on top of Phase 3's clipboard MVP.
+// Electron main entry point — Phase 5 (final user story).
+// Wires every subsystem: settings, fingerprint cache, clipboard watcher,
+// widget window with mode reactions, system tray, hotkey manager,
+// autostart, and a lazy settings window.
 
-import { app } from 'electron';
+import { app, BrowserWindow } from 'electron';
+import { IPC } from '../shared/ipc-channels.js';
 import { createSettingsStore } from './services/settingsStore.js';
 import { createSelfFingerprintCache } from './services/selfFingerprintCache.js';
 import { createClipboardWatcher } from './services/clipboardWatcher.js';
 import { createWidgetWindow, type WidgetWindowControl } from './windows/widgetWindow.js';
+import { createSettingsWindow } from './windows/settingsWindow.js';
 import { createWidgetReactions } from './services/widgetReactions.js';
 import { createTrayManager } from './services/trayManager.js';
+import { createHotkeyManager } from './services/hotkeyManager.js';
+import { createAutostartManager } from './services/autostart.js';
 import { registerIpcHandlers } from './ipc/handlers.js';
-import { IPC } from '../shared/ipc-channels.js';
 
 const gotTheLock = app.requestSingleInstanceLock();
 
@@ -20,6 +24,7 @@ if (!gotTheLock) {
 }
 
 let widget: WidgetWindowControl | null = null;
+let settingsWin: BrowserWindow | null = null;
 
 app.on('second-instance', () => {
   if (widget && !widget.window.isDestroyed()) {
@@ -34,6 +39,16 @@ app
   .then(() => {
     const settingsStore = createSettingsStore();
     const selfFingerprintCache = createSelfFingerprintCache();
+    const autostart = createAutostartManager();
+
+    // Reconcile autostart with the actual registry value on launch.
+    {
+      const registryEnabled = autostart.isEnabled();
+      const settingsEnabled = settingsStore.get().autostart;
+      if (registryEnabled !== settingsEnabled) {
+        settingsStore.set({ autostart: registryEnabled });
+      }
+    }
 
     const devServerUrl = process.env.VITE_DEV_SERVER_URL;
     widget = createWidgetWindow({
@@ -63,20 +78,67 @@ app
       },
     });
 
-    const tray = createTrayManager({ widget });
+    const hotkeyManager = createHotkeyManager({
+      bindings: settingsStore.get().hotkeys,
+      onTriggered: (action) => {
+        if (widget && !widget.window.isDestroyed()) {
+          widget.window.webContents.send(IPC.HOTKEYS_TRIGGERED, { action });
+        }
+      },
+      onConflict: (action) => {
+        if (widget && !widget.window.isDestroyed()) {
+          widget.window.webContents.send(IPC.HOTKEYS_CONFLICT, { action });
+        }
+        if (settingsWin && !settingsWin.isDestroyed()) {
+          settingsWin.webContents.send(IPC.HOTKEYS_CONFLICT, { action });
+        }
+      },
+    });
+
+    hotkeyManager.registerAll();
+
+    const showSettings = (): void => {
+      if (settingsWin && !settingsWin.isDestroyed()) {
+        settingsWin.focus();
+        return;
+      }
+      settingsWin = createSettingsWindow({
+        ...(devServerUrl !== undefined ? { devServerUrl } : {}),
+      });
+      settingsWin.on('closed', () => {
+        settingsWin = null;
+      });
+    };
+
+    const tray = createTrayManager({ widget, onShowSettings: showSettings });
 
     registerIpcHandlers({
       settingsStore,
       clipboardWatcher,
       selfFingerprintCache,
       widget,
+      hotkeyManager,
+      autostart,
+      showSettings,
+      onOnboardingComplete: () => {
+        widget?.swapToWidgetShell();
+      },
     });
 
     clipboardWatcher.start();
 
+    // Expose internals for E2E tests. Harmless in production but tests need
+    // a way to call hotkeyManager.trigger() without OS-level keyboard input.
+    (globalThis as unknown as { __rtlfixer__?: unknown }).__rtlfixer__ = {
+      hotkeyManager,
+      widget,
+      autostart,
+    };
+
     app.on('before-quit', () => {
       clipboardWatcher.stop();
       reactions.dispose();
+      hotkeyManager.unregisterAll();
       tray.destroy();
     });
 

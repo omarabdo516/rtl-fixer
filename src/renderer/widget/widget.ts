@@ -161,6 +161,43 @@ if (window.api?.clipboard?.onArabicDetected) {
   });
 }
 
+// ─── Global hotkey reactions (US3) ───────────────────────────────
+
+if (window.api?.hotkeys?.onTriggered) {
+  window.api.hotkeys.onTriggered((action) => {
+    switch (action) {
+      case 'toggle':
+        if (currentMode === 'expanded') {
+          void window.api.widget.requestCollapsed();
+        } else {
+          void window.api.widget.requestExpanded();
+        }
+        break;
+      case 'render':
+        void window.api.clipboard.forceRenderCurrent();
+        void window.api.widget.requestExpanded();
+        break;
+      case 'copyReply': {
+        const $reply = document.getElementById('reply') as HTMLTextAreaElement | null;
+        const text = $reply?.value.trim();
+        if (text) void window.api.clipboard.writeReply(text);
+        break;
+      }
+      case 'clear': {
+        const $input = document.getElementById('input') as HTMLTextAreaElement | null;
+        const $output = document.getElementById('output');
+        const $reply = document.getElementById('reply') as HTMLTextAreaElement | null;
+        if ($input) $input.value = '';
+        if ($output) $output.innerHTML = '';
+        if ($reply) $reply.value = '';
+        $input?.dispatchEvent(new Event('input'));
+        $reply?.dispatchEvent(new Event('input'));
+        break;
+      }
+    }
+  });
+}
+
 // ─── Init ────────────────────────────────────────────────────────
 
 setMode('collapsed');

@@ -1,24 +1,48 @@
-// IPC handler registration. Phase 4 wires prefs:* + clipboard:* + widget:*.
-// Story-specific channels for hotkeys:*, app:*, theme:* land in Phase 5.
+// IPC handler registration. Phase 5 wires the full surface:
+// prefs:* + clipboard:* + widget:* + hotkeys:* + app:* + theme:*.
 
-import { ipcMain, BrowserWindow, clipboard } from 'electron';
+import { ipcMain, BrowserWindow, clipboard, app, shell, nativeTheme } from 'electron';
 import { IPC } from '../../shared/ipc-channels.js';
 import type { SettingsStore } from '../services/settingsStore.js';
 import type { ClipboardWatcher } from '../services/clipboardWatcher.js';
 import type { SelfFingerprintCache } from '../services/selfFingerprintCache.js';
 import type { WidgetWindowControl } from '../windows/widgetWindow.js';
+import type { HotkeyManager } from '../services/hotkeyManager.js';
+import type { AutostartManager } from '../services/autostart.js';
 import { fingerprint } from '../services/fingerprint.js';
-import type { ClipboardEvent, UserPreferences, WidgetMode } from '../../shared/types.js';
+import type {
+  ClipboardEvent,
+  HotkeyAccelerator,
+  HotkeyAction,
+  HotkeyBindings,
+  UserPreferences,
+  WidgetMode,
+} from '../../shared/types.js';
+
+const ALLOWED_EXTERNAL_URL_HOSTS = new Set(['github.com', 'rspaac.com']);
 
 export interface IpcHandlerDeps {
   settingsStore: SettingsStore;
   clipboardWatcher: ClipboardWatcher;
   selfFingerprintCache: SelfFingerprintCache;
   widget: WidgetWindowControl;
+  hotkeyManager: HotkeyManager;
+  autostart: AutostartManager;
+  showSettings: () => void;
+  onOnboardingComplete: () => void;
 }
 
 export function registerIpcHandlers(deps: IpcHandlerDeps): void {
-  const { settingsStore, clipboardWatcher, selfFingerprintCache, widget } = deps;
+  const {
+    settingsStore,
+    clipboardWatcher,
+    selfFingerprintCache,
+    widget,
+    hotkeyManager,
+    autostart,
+    showSettings,
+    onOnboardingComplete,
+  } = deps;
 
   // ─── Preferences ────────────────────────────────────────────────
   ipcMain.handle(IPC.PREFS_GET, () => settingsStore.get());
@@ -33,7 +57,7 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
     broadcast(IPC.PREFS_UPDATED, next);
   });
 
-  // ─── Clipboard (User Story 1) ──────────────────────────────────
+  // ─── Clipboard (US1) ───────────────────────────────────────────
   ipcMain.handle(
     IPC.CLIPBOARD_WRITE_REPLY,
     (_event, payload: { text: string }) => {
@@ -61,7 +85,7 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
     return event;
   });
 
-  // ─── Widget (User Story 2) ─────────────────────────────────────
+  // ─── Widget (US2) ──────────────────────────────────────────────
   ipcMain.handle(IPC.WIDGET_SET_MODE, (_event, payload: { mode: WidgetMode }) => {
     widget.setMode(payload.mode);
   });
@@ -77,6 +101,71 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
   ipcMain.handle(IPC.WIDGET_SET_POSITION, (_event, payload: { x: number; y: number }) => {
     widget.window.setPosition(payload.x, payload.y);
   });
+
+  // ─── Hotkeys (US3) ─────────────────────────────────────────────
+  ipcMain.handle(IPC.HOTKEYS_GET_BINDINGS, (): HotkeyBindings => hotkeyManager.getBindings());
+
+  ipcMain.handle(
+    IPC.HOTKEYS_SET_BINDING,
+    (_event, payload: { action: HotkeyAction; accelerator: HotkeyAccelerator }) => {
+      const result = hotkeyManager.setBinding(payload.action, payload.accelerator);
+      if (result.ok) {
+        const next = settingsStore.set({ hotkeys: hotkeyManager.getBindings() });
+        broadcast(IPC.PREFS_UPDATED, next);
+      }
+      return result;
+    },
+  );
+
+  // ─── App lifecycle (US3) ───────────────────────────────────────
+  ipcMain.handle(IPC.APP_QUIT, () => {
+    app.quit();
+  });
+
+  ipcMain.handle(IPC.APP_SET_AUTOSTART, (_event, payload: { enabled: boolean }) => {
+    const reconciled = autostart.setEnabled(payload.enabled);
+    settingsStore.set({ autostart: reconciled });
+    return reconciled;
+  });
+
+  ipcMain.handle(IPC.APP_SHOW_SETTINGS, () => {
+    showSettings();
+  });
+
+  ipcMain.handle(IPC.APP_COMPLETE_ONBOARDING, () => {
+    settingsStore.set({ onboardingCompleted: true });
+    onOnboardingComplete();
+  });
+
+  ipcMain.handle(IPC.APP_OPEN_EXTERNAL, (_event, payload: { url: string }) => {
+    let parsed: URL;
+    try {
+      parsed = new URL(payload.url);
+    } catch {
+      throw new Error('INVALID_URL');
+    }
+    if (parsed.protocol !== 'https:') {
+      throw new Error('INVALID_URL');
+    }
+    if (!ALLOWED_EXTERNAL_URL_HOSTS.has(parsed.hostname)) {
+      throw new Error('INVALID_URL');
+    }
+    void shell.openExternal(parsed.toString());
+  });
+
+  // ─── Theme ─────────────────────────────────────────────────────
+  ipcMain.handle(IPC.THEME_GET_RESOLVED, () => resolveTheme(settingsStore));
+
+  nativeTheme.on('updated', () => {
+    broadcast(IPC.THEME_RESOLVED_CHANGED, { theme: resolveTheme(settingsStore) });
+  });
+}
+
+function resolveTheme(settingsStore: SettingsStore): 'light' | 'dark' {
+  const theme = settingsStore.get().theme;
+  if (theme === 'light') return 'light';
+  if (theme === 'dark') return 'dark';
+  return nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
 }
 
 function broadcast(channel: string, payload: unknown): void {

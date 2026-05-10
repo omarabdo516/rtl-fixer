@@ -1,39 +1,29 @@
-// E2E baseline test: launch the built Electron app, confirm a window appears
-// with the typed window.api surface exposed, then quit cleanly. Validates that
-// the foundational scaffolding (single-instance lock, IPC, preload bridge)
-// holds together before any feature-level E2E tests are written.
+// E2E baseline test: launch the built Electron app, confirm a window
+// appears with the typed window.api surface exposed, then quit cleanly.
 
-import { test, expect, _electron as electron } from '@playwright/test';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { test, expect } from '@playwright/test';
+import { launchWithSettings, type LaunchedApp } from './_helpers.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+let env: LaunchedApp;
 
-const APP_ENTRY = join(__dirname, '../../dist/main/main.js');
+test.beforeEach(async () => {
+  env = await launchWithSettings();
+});
+
+test.afterEach(async () => {
+  await env.cleanup();
+});
 
 test('app launches, window appears, window.api is exposed, app quits cleanly', async () => {
-  const electronApp = await electron.launch({
-    args: [APP_ENTRY],
-    timeout: 15_000,
-  });
+  expect(env.page).toBeTruthy();
 
-  const window = await electronApp.firstWindow({ timeout: 10_000 });
-  expect(window).toBeTruthy();
-
-  await window.waitForLoadState('domcontentloaded');
-
-  // Confirm the preload script exposed window.api
-  const apiAvailable = await window.evaluate(
+  const apiAvailable = await env.page.evaluate(
     () => typeof (globalThis as { api?: unknown }).api === 'object' && (globalThis as { api?: unknown }).api !== null,
   );
   expect(apiAvailable).toBe(true);
 
-  // Confirm a known method exists on the api surface (smoke test of the contract)
-  const hasPrefsGet = await window.evaluate(
+  const hasPrefsGet = await env.page.evaluate(
     () => typeof (globalThis as { api?: { prefs?: { get?: unknown } } }).api?.prefs?.get === 'function',
   );
   expect(hasPrefsGet).toBe(true);
-
-  await electronApp.close();
 });
