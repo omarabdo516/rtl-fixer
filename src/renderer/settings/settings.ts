@@ -12,6 +12,15 @@ import type {
 
 const HOTKEY_ACTIONS: readonly HotkeyAction[] = ['toggle', 'render', 'copyReply', 'clear'];
 
+// Arabic labels for each action — used in user-facing status messages so we
+// don't print raw camelCase identifiers like "copyReply" inside Arabic text.
+const ACTION_LABELS: Record<HotkeyAction, string> = {
+  toggle: 'الإظهار/الإخفاء',
+  render: 'عرض النص',
+  copyReply: 'نسخ الرد',
+  clear: 'المسح',
+};
+
 const $themeSelect = document.getElementById('theme-select') as HTMLSelectElement | null;
 const $layoutSelect = document.getElementById('layout-select') as HTMLSelectElement | null;
 const $autostart = document.getElementById('autostart-toggle') as HTMLInputElement | null;
@@ -68,7 +77,7 @@ void initialize();
 
 $themeSelect.addEventListener('change', () => {
   const theme = $themeSelect!.value as Theme;
-  void window.api.prefs.set({ theme }).then(() => setStatus('الـ theme اتحفظ', 'success'));
+  void window.api.prefs.set({ theme }).then(() => setStatus('المظهر اتحفظ', 'success'));
 });
 
 $layoutSelect.addEventListener('change', () => {
@@ -79,7 +88,7 @@ $layoutSelect.addEventListener('change', () => {
 $autostart.addEventListener('change', async () => {
   const reconciled = await window.api.app.setAutostart($autostart!.checked);
   $autostart!.checked = reconciled;
-  setStatus(reconciled ? 'الـ autostart اتفعّل' : 'الـ autostart اتعطّل', 'success');
+  setStatus(reconciled ? 'التشغيل التلقائي اتفعّل' : 'التشغيل التلقائي اتعطّل', 'success');
 });
 
 // ─── Hotkey rebind ────────────────────────────────────────────────
@@ -149,14 +158,14 @@ for (const [action, input] of hotkeyInputs) {
     if (result.ok) {
       input.value = accelerator;
       input.classList.remove('is-error', 'is-recording');
-      setStatus(`الـ hotkey لـ "${action}" اتحدّث`, 'success');
+      setStatus(`اختصار ${ACTION_LABELS[action]} اتحدّث`, 'success');
       input.blur();
     } else {
       input.classList.add('is-error');
       const reasons: Record<string, string> = {
-        conflict: 'الـ combo ده محجوز من تطبيق تاني',
-        duplicate: 'الـ combo ده مستخدم في action تاني',
-        'invalid-accelerator': 'الـ combo لازم يحتوي modifier + key',
+        conflict: 'الاختصار ده محجوز من تطبيق تاني',
+        duplicate: 'الاختصار ده مستعمَل لحاجة تانية',
+        'invalid-accelerator': 'لازم تستخدم Ctrl أو Alt أو Shift مع حرف',
       };
       setStatus(reasons[result.reason] ?? 'فشل', 'error');
     }
@@ -168,5 +177,5 @@ for (const [action, input] of hotkeyInputs) {
 window.api.hotkeys.onConflict((action) => {
   const input = hotkeyInputs.get(action);
   if (input) input.classList.add('is-error');
-  setStatus(`الـ hotkey "${action}" محجوز — غيّر الـ combo`, 'error');
+  setStatus(`اختصار ${ACTION_LABELS[action]} محجوز — غيّره من فضلك`, 'error');
 });

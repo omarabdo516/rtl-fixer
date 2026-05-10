@@ -50,7 +50,7 @@ function setStatus(msg: string, type: '' | 'success' = ''): void {
     statusTimer = window.setTimeout(() => {
       $status!.textContent = '';
       $status!.className = 'status-bar';
-    }, 2400);
+    }, 4000);
   }
 }
 

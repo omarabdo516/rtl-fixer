@@ -248,5 +248,48 @@ body[data-mode="expanded"] .widget-notification { display: none; }
   padding: 1rem 1.4rem;
 }
 
+/* F-009: Hide the editor's brand title and meta text when embedded inside
+   the widget shell — the widget titlebar already provides chrome, the
+   double-title was wasting ~40px of a 600px widget. The layout switcher
+   stays since it's still useful inside the editor. */
+.widget-editor-host .header h1,
+.widget-editor-host .header .meta {
+  display: none;
+}
+.widget-editor-host .header {
+  padding-bottom: 0.4rem;
+  border-bottom: none;
+}
+
+/* F-010: Reply is the active workspace (user writes there). Output is for
+   reading. Give reply the flexible space, output a fixed comfortable
+   minimum. Reverses the v1 priority. */
+.widget-editor-host .reply-block {
+  flex: 1;
+  min-height: 200px;
+}
+.widget-editor-host .reply-block textarea#reply {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+}
+.widget-editor-host .output-block {
+  flex: 0 0 auto;
+}
+.widget-editor-host .output-wrap {
+  height: 220px;
+}
+
 /* ─── Auto-fade (collapsed mode only) ──────────────────────────── */
 body.is-faded { opacity: 0.3; }
+
+/* F-014: respect prefers-reduced-motion. Pulse, slide-in, and fade-in
+   animations all collapse to near-instant; transitions stay fast but
+   visible. Users who toggle this OS setting won't see distracting motion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
