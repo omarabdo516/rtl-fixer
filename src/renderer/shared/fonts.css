@@ -1,0 +1,19 @@
+/* Self-hosted font stacks (R2-012). Replaces the previous link to
+   fonts.googleapis.com so the app needs no external network at startup,
+   works offline, and keeps the renderer CSP locked down to 'self'.
+   Each main CSS in src/renderer/{widget,editor,settings,onboarding}/
+   imports this file at the top. Only the subsets we render are pulled
+   in (Tajawal: Arabic + Latin; JetBrains Mono: Latin) — Vite copies the
+   referenced .woff2 files into dist with hashed names. */
+
+/* Tajawal — Arabic + Latin only (3 weights) */
+@import '@fontsource/tajawal/arabic-400.css';
+@import '@fontsource/tajawal/arabic-500.css';
+@import '@fontsource/tajawal/arabic-700.css';
+@import '@fontsource/tajawal/latin-400.css';
+@import '@fontsource/tajawal/latin-500.css';
+@import '@fontsource/tajawal/latin-700.css';
+
+/* JetBrains Mono — Latin only (2 weights, no italic) */
+@import '@fontsource/jetbrains-mono/latin-400.css';
+@import '@fontsource/jetbrains-mono/latin-500.css';

@@ -165,6 +165,12 @@ for (const [action, input] of hotkeyInputs) {
       input.blur();
     } else {
       input.classList.add('is-error');
+      // R2-008: refresh the input value to the actual current binding so
+      // the user sees the truth (the failed accelerator was rejected and
+      // the previous binding is still in effect). Without this, the input
+      // sits with the failed string until the user blurs.
+      const prefs = await window.api.prefs.get();
+      input.value = prefs.hotkeys[action];
       const reasons: Record<string, string> = {
         conflict: 'الاختصار ده محجوز من تطبيق تاني',
         duplicate: 'الاختصار ده مستعمَل لحاجة تانية',
@@ -190,6 +196,13 @@ const $resetBtn = document.getElementById('settings-reset') as HTMLButtonElement
 
 $closeBtn?.addEventListener('click', () => {
   window.close();
+});
+
+// R2-014: Esc closes the settings window (matches OS dialog convention).
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.activeElement?.tagName !== 'INPUT') {
+    window.close();
+  }
 });
 
 $resetBtn?.addEventListener('click', async () => {

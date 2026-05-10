@@ -1,3 +1,5 @@
+@import url('../shared/fonts.css');
+
 /* Widget shell — three modes (collapsed circle, notification bar, expanded
    card). The Electron window is frameless+transparent; the visible shapes
    live inside the body. */
@@ -181,6 +183,7 @@ body[data-mode="expanded"] .widget-notification { display: none; }
 .widget-expanded {
   width: 100%;
   height: 100%;
+  position: relative;
   /* Use --bg from editor.css cascade — flips to dark when data-theme="dark"
      is set on <html>. */
   background: var(--bg, oklch(98% 0.005 80));
@@ -192,6 +195,40 @@ body[data-mode="expanded"] .widget-notification { display: none; }
   flex-direction: column;
   overflow: hidden;
   animation: expanded-fade-in 200ms ease-out;
+}
+
+/* R2-015: corner resize-grip glyph. The window is frameless+transparent so
+   users have no native cue that the expanded card is resizable. Electron's
+   OS-level resize edges still work; this is purely a visual affordance.
+   Pure-CSS three-stripe diagonal grip in the bottom-end corner (RTL-aware
+   via inset-inline-end). pointer-events:none so it doesn't intercept the
+   OS resize hit-test. */
+.widget-expanded::after {
+  content: '';
+  position: absolute;
+  inset-block-end: 3px;
+  inset-inline-end: 3px;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image:
+    linear-gradient(135deg,
+      transparent 0%, transparent 35%,
+      var(--border, oklch(78% 0.005 80)) 35%, var(--border, oklch(78% 0.005 80)) 45%,
+      transparent 45%, transparent 60%,
+      var(--border, oklch(78% 0.005 80)) 60%, var(--border, oklch(78% 0.005 80)) 70%,
+      transparent 70%, transparent 85%,
+      var(--border, oklch(78% 0.005 80)) 85%, var(--border, oklch(78% 0.005 80)) 95%,
+      transparent 95%);
+  /* Mirror the gradient when the document is RTL so the grip points away
+     from the screen edge in either direction. */
+}
+[dir="rtl"] .widget-expanded::after {
+  transform: scaleX(-1);
+}
+.widget-expanded:hover::after {
+  opacity: 0.85;
 }
 
 @keyframes expanded-fade-in {

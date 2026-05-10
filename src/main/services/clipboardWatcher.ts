@@ -9,6 +9,8 @@ import { fingerprint } from './fingerprint.js';
 import type { SelfFingerprintCache } from './selfFingerprintCache.js';
 import type { ClipboardEvent } from '../../shared/types.js';
 
+const RECOPY_GRACE_MS = 5000;
+
 export interface ClipboardWatcherDeps {
   selfFingerprintCache: SelfFingerprintCache;
   onArabicDetected: (event: ClipboardEvent) => void;
@@ -22,10 +24,15 @@ export interface ClipboardWatcher {
 }
 
 export function createClipboardWatcher(deps: ClipboardWatcherDeps): ClipboardWatcher {
-  const { selfFingerprintCache, onArabicDetected, pollIntervalMs = 500 } = deps;
+  // R2-011: 500ms → 1000ms default. With autostart=true the app polls
+  // every second instead of twice a second, halving idle wakeups on
+  // battery. Subjectively undetectable for the user (1s vs 0.5s clipboard
+  // detection).
+  const { selfFingerprintCache, onArabicDetected, pollIntervalMs = 1000 } = deps;
 
   let timer: NodeJS.Timeout | null = null;
   let lastSeenText = '';
+  let lastSeenAt = 0;
   let lastExternalEvent: ClipboardEvent | null = null;
 
   const tick = (): void => {
@@ -36,10 +43,16 @@ export function createClipboardWatcher(deps: ClipboardWatcherDeps): ClipboardWat
       return;
     }
 
-    if (text === lastSeenText) return;
-    lastSeenText = text;
-
     if (text.length === 0) return;
+
+    // R2-010: dedup identical consecutive reads, but only inside a short
+    // grace window. After RECOPY_GRACE_MS, the user might intentionally
+    // re-copy the same text expecting a re-render — let it through.
+    if (text === lastSeenText && Date.now() - lastSeenAt < RECOPY_GRACE_MS) {
+      return;
+    }
+    lastSeenText = text;
+    lastSeenAt = Date.now();
 
     const fp = fingerprint(text);
 
@@ -73,6 +86,7 @@ export function createClipboardWatcher(deps: ClipboardWatcherDeps): ClipboardWat
       } catch {
         lastSeenText = '';
       }
+      lastSeenAt = Date.now();
       timer = setInterval(tick, pollIntervalMs);
     },
     stop(): void {

@@ -20,10 +20,11 @@ const $notification = document.getElementById('notification') as HTMLElement | n
 const $bubblePulse = document.getElementById('bubble-pulse') as HTMLElement | null;
 const $bubbleBadge = document.getElementById('bubble-badge') as HTMLElement | null;
 const $collapseBtn = document.getElementById('widget-collapse-btn') as HTMLButtonElement | null;
+const $hideBtn = document.getElementById('widget-hide-btn') as HTMLButtonElement | null;
 const $pinBtn = document.getElementById('widget-pin-btn') as HTMLButtonElement | null;
 const $settingsBtn = document.getElementById('widget-settings-btn') as HTMLButtonElement | null;
 
-if (!$collapsed || !$expanded || !$notification || !$bubblePulse || !$bubbleBadge || !$collapseBtn || !$pinBtn || !$settingsBtn) {
+if (!$collapsed || !$expanded || !$notification || !$bubblePulse || !$bubbleBadge || !$collapseBtn || !$hideBtn || !$pinBtn || !$settingsBtn) {
   throw new Error('widget.ts: missing required DOM elements');
 }
 
@@ -142,6 +143,12 @@ $collapseBtn.addEventListener('click', () => {
   void window.api.widget.requestCollapsed();
 });
 
+// R2-013: hide the widget completely (window.hide via main close intercept).
+$hideBtn.addEventListener('click', () => {
+  // Trigger the same close path as Alt+F4 — main.ts intercepts and hides.
+  window.close();
+});
+
 // ─── Settings entry ─────────────────────────────────────────────
 
 $settingsBtn.addEventListener('click', () => {
@@ -217,6 +224,18 @@ if (window.api?.clipboard?.onArabicDetected) {
 }
 
 // ─── Global hotkey reactions (US3) ───────────────────────────────
+
+// R2-014: Esc collapses the widget when in expanded mode (or hides if
+// already collapsed). Doesn't fire when an input/textarea is focused —
+// users typing reply expect Esc to do nothing OS-y.
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  if (currentMode === 'expanded') {
+    void window.api.widget.requestCollapsed();
+  }
+});
 
 if (window.api?.hotkeys?.onTriggered) {
   window.api.hotkeys.onTriggered((action) => {

@@ -48,9 +48,12 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
   ipcMain.handle(IPC.PREFS_GET, () => settingsStore.get());
 
   ipcMain.handle(IPC.PREFS_SET, (_event, patch: Partial<UserPreferences>) => {
-    const next = settingsStore.set(patch);
-    broadcast(IPC.PREFS_UPDATED, next);
-    return next;
+    // R2-007: don't double-broadcast. settingsStore.subscribe below already
+    // fires PREFS_UPDATED via electron-store's onDidAnyChange. The previous
+    // explicit broadcast here caused renderers (especially the hotkey
+    // rebind input) to re-render twice on every set, racing the user's
+    // mid-edit recording state.
+    return settingsStore.set(patch);
   });
 
   settingsStore.subscribe((next) => {
