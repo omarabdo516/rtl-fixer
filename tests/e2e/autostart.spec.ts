@@ -25,7 +25,7 @@ const SETTINGS_AUTOSTART_OFF = {
   widget: { position: { x: -1, y: -1 }, pinnedEdge: null },
   hotkeys: {
     toggle: 'Control+Shift+R',
-    render: 'Control+Shift+V',
+    render: 'Control+Alt+V',
     copyReply: 'Control+Shift+C',
     clear: 'Control+Shift+X',
   },

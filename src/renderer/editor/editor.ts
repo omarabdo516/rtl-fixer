@@ -70,10 +70,12 @@ function setStatus(msg: string, type: '' | 'success' = ''): void {
   $status!.className = 'status-bar' + (type ? ' ' + type : '');
   if (statusTimer !== undefined) clearTimeout(statusTimer);
   if (msg) {
+    // R2-021: 4000ms was leaving toasts overlapping when the user copied
+    // twice in quick succession. 2800ms matches v1 + perceived snappiness.
     statusTimer = window.setTimeout(() => {
       $status!.textContent = '';
       $status!.className = 'status-bar';
-    }, 4000);
+    }, 2800);
   }
 }
 
@@ -168,3 +170,15 @@ void window.api.prefs.get().then((prefs) => {
   applyLayoutVisual(prefs.layout);
 });
 updateButtons();
+
+// R2-027: render the Copy-reply shortcut glyph based on the actual host
+// platform. Windows/Linux see "Ctrl+Enter"; macOS sees "⌘↵". The HTML
+// markup ships with the macOS glyph so screen readers always have valid
+// text — JS just rewrites for non-mac.
+{
+  const isMac = navigator.platform.toLowerCase().includes('mac');
+  const $kbd = $copyReply!.querySelector('kbd.kbd');
+  if ($kbd) {
+    $kbd.textContent = isMac ? '⌘↵' : 'Ctrl+Enter';
+  }
+}

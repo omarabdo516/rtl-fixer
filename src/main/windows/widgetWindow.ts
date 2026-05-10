@@ -210,6 +210,13 @@ export function createWidgetWindow(opts: CreateWidgetWindowOptions): WidgetWindo
         primaryWorkArea: workAreaToData(screen.getPrimaryDisplay()),
       });
 
+      // R2-016: clear any pending debounce timer from a prior user drag,
+      // otherwise its delayed callback could persist a stale position
+      // captured before the programmatic resize.
+      if (moveTimer !== null) {
+        clearTimeout(moveTimer);
+        moveTimer = null;
+      }
       suppressMoveUntil = Date.now() + PROGRAMMATIC_MOVE_GUARD_MS;
       win.setBounds({
         x: widgetStartup.position.x,
@@ -237,6 +244,11 @@ export function createWidgetWindow(opts: CreateWidgetWindowOptions): WidgetWindo
       const newX = curX + prevSize.width - size.width;
       const newY = curY + prevSize.height - size.height;
 
+      // R2-016: same defensive clear as swapToWidgetShell.
+      if (moveTimer !== null) {
+        clearTimeout(moveTimer);
+        moveTimer = null;
+      }
       suppressMoveUntil = Date.now() + PROGRAMMATIC_MOVE_GUARD_MS;
       win.setBounds({ x: newX, y: newY, width: size.width, height: size.height }, true);
       win.setAlwaysOnTop(true, 'floating');

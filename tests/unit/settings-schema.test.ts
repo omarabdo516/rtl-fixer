@@ -39,7 +39,7 @@ describe('settingsStore', () => {
     expect(prefs.autostart).toBe(true);
     expect(prefs.onboardingCompleted).toBe(false);
     expect(prefs.hotkeys.toggle).toBe('Control+Shift+R');
-    expect(prefs.hotkeys.render).toBe('Control+Shift+V');
+    expect(prefs.hotkeys.render).toBe('Control+Alt+V');
     expect(prefs.hotkeys.copyReply).toBe('Control+Shift+C');
     expect(prefs.hotkeys.clear).toBe('Control+Shift+X');
     expect(prefs.sounds.enabled).toBe(false);
@@ -82,7 +82,7 @@ describe('settingsStore', () => {
     store.set({ hotkeys: { ...SETTINGS_DEFAULTS.hotkeys, toggle: 'Control+Shift+T' } });
     const prefs = store.get();
     expect(prefs.hotkeys.toggle).toBe('Control+Shift+T');
-    expect(prefs.hotkeys.render).toBe('Control+Shift+V');
+    expect(prefs.hotkeys.render).toBe('Control+Alt+V');
     expect(prefs.hotkeys.copyReply).toBe('Control+Shift+C');
     expect(prefs.hotkeys.clear).toBe('Control+Shift+X');
   });

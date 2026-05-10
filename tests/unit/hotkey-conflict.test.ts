@@ -7,7 +7,7 @@ import type { HotkeyBindings } from '../../src/shared/types.js';
 
 const DEFAULTS: HotkeyBindings = {
   toggle: 'Control+Shift+R',
-  render: 'Control+Shift+V',
+  render: 'Control+Alt+V',
   copyReply: 'Control+Shift+C',
   clear: 'Control+Shift+X',
 };
@@ -45,7 +45,7 @@ describe('findDuplicateBinding', () => {
   });
 
   it('returns the conflicting action when accelerator is already used', () => {
-    expect(findDuplicateBinding('toggle', 'Control+Shift+V', DEFAULTS)).toBe('render');
+    expect(findDuplicateBinding('toggle', 'Control+Alt+V', DEFAULTS)).toBe('render');
     expect(findDuplicateBinding('toggle', 'Control+Shift+C', DEFAULTS)).toBe('copyReply');
   });
 

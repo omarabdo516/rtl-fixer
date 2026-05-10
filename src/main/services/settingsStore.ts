@@ -19,7 +19,9 @@ const DEFAULTS: UserPreferences = {
   },
   hotkeys: {
     toggle: 'Control+Shift+R',
-    render: 'Control+Shift+V',
+    // R2-020: default was Ctrl+Shift+V which collides with Windows Terminal
+    // "paste as plain text". Ctrl+Alt+V is unused by Windows + most IDEs.
+    render: 'Control+Alt+V',
     copyReply: 'Control+Shift+C',
     clear: 'Control+Shift+X',
   },

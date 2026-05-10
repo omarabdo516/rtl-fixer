@@ -83,7 +83,8 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
   ipcMain.handle(IPC.CLIPBOARD_FORCE_RENDER_CURRENT, (): ClipboardEvent | null => {
     const event = clipboardWatcher.getLastExternalEvent();
     if (event !== null) {
-      broadcast(IPC.CLIPBOARD_ARABIC_DETECTED, event);
+      // R2-017: clipboard events are widget-only — settings has no editor.
+      sendToWidget(IPC.CLIPBOARD_ARABIC_DETECTED, event);
     }
     return event;
   });
@@ -143,7 +144,9 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
   ipcMain.handle(IPC.APP_SET_ALWAYS_ON_TOP, (_event, payload: { enabled: boolean }) => {
     widget.setAlwaysOnTop(payload.enabled);
     const actual = widget.isAlwaysOnTop();
-    broadcast(IPC.APP_ALWAYS_ON_TOP_CHANGED, { enabled: actual });
+    // R2-017: pin state is a widget-only concern (the settings window
+    // doesn't have a pin button to reflect).
+    sendToWidget(IPC.APP_ALWAYS_ON_TOP_CHANGED, { enabled: actual });
     return actual;
   });
 
@@ -180,9 +183,24 @@ function resolveTheme(settingsStore: SettingsStore): 'light' | 'dark' {
   return nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
 }
 
+// Used for genuinely shared channels (PREFS_UPDATED, THEME_RESOLVED_CHANGED)
+// — both the widget and the settings window need them to stay in sync.
 function broadcast(channel: string, payload: unknown): void {
   for (const win of BrowserWindow.getAllWindows()) {
     if (!win.isDestroyed()) {
+      win.webContents.send(channel, payload);
+    }
+  }
+}
+
+// R2-017: widget-only events (clipboard:arabic-detected, pin state, mode).
+// The widget's BrowserWindow is the one with title "RTL Fixer v2"; settings
+// has its own title. Match by title to avoid sending widget events to a
+// settings window that's open at the same time.
+function sendToWidget(channel: string, payload: unknown): void {
+  for (const win of BrowserWindow.getAllWindows()) {
+    if (win.isDestroyed()) continue;
+    if (win.getTitle() === 'RTL Fixer v2') {
       win.webContents.send(channel, payload);
     }
   }

@@ -125,7 +125,20 @@ app
 
     hotkeyManager.registerAll();
 
+    const reconcileAutostart = (): void => {
+      // R2-018: the user might toggle autostart externally (Task Manager,
+      // Settings → Apps → Startup). Reconcile every time we open the settings
+      // window so the toggle reflects the actual registry value, not whatever
+      // we cached at boot.
+      const registryEnabled = autostart.isEnabled();
+      const settingsEnabled = settingsStore.get().autostart;
+      if (registryEnabled !== settingsEnabled) {
+        settingsStore.set({ autostart: registryEnabled });
+      }
+    };
+
     const showSettings = (): void => {
+      reconcileAutostart();
       if (settingsWin && !settingsWin.isDestroyed()) {
         settingsWin.focus();
         return;

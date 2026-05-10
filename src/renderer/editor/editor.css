@@ -206,7 +206,10 @@ textarea:focus {
   background: var(--surface-2);
 }
 textarea#input {
-  height: 95px;
+  /* R2-019: 70px is the single source of truth (was 95px here + 70px override
+     in widget.css, which fought every layout change). 70px works in both
+     standalone editor and widget shell. */
+  height: 70px;
   font-family: var(--font-arabic);
   font-size: 0.95rem;
   line-height: 1.7;

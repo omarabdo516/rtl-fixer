@@ -50,6 +50,9 @@ function setStatus(msg: string, kind: 'success' | 'error' | '' = ''): void {
       $status!.className = 'status-bar';
     }, 3500);
   }
+  // R2-025: success toasts stamp lastSaveAt so a quick Done/Esc close
+  // is held long enough for the user to actually see what happened.
+  if (kind === 'success') markSaved();
 }
 
 function renderForm(prefs: UserPreferences): void {
@@ -128,11 +131,15 @@ for (const [action, input] of hotkeyInputs) {
   input.addEventListener('focus', () => {
     input.classList.add('is-recording');
     input.classList.remove('is-error');
-    input.value = 'اضغط الـ combo...';
+    // R2-029: stronger recording affordance — emoji dot + clearer instructions.
+    // Tooltip explains how to confirm/cancel without leaving the input.
+    input.value = '🔴 اضغط الاختصار...';
+    input.title = 'اضغط الاختصار · Esc لإلغاء · Tab للخروج';
   });
 
   input.addEventListener('blur', () => {
     input.classList.remove('is-recording');
+    input.removeAttribute('title');
     // Restore actual current binding from prefs on blur without commit
     void window.api.prefs.get().then((prefs) => {
       input.value = prefs.hotkeys[action];
@@ -194,14 +201,29 @@ window.api.hotkeys.onConflict((action) => {
 const $closeBtn = document.getElementById('settings-close') as HTMLButtonElement | null;
 const $resetBtn = document.getElementById('settings-reset') as HTMLButtonElement | null;
 
-$closeBtn?.addEventListener('click', () => {
-  window.close();
-});
+// R2-025: track when the last save IPC fired so the close path can wait long
+// enough for the success toast to actually render. Without this, the user
+// clicks a setting and immediately Done — the window dies before the toast.
+let lastSaveAt = 0;
+function markSaved(): void {
+  lastSaveAt = Date.now();
+}
+function closeWithGrace(): void {
+  const elapsed = Date.now() - lastSaveAt;
+  const wait = elapsed < 200 ? 200 - elapsed : 0;
+  if (wait === 0) {
+    window.close();
+  } else {
+    window.setTimeout(() => window.close(), wait);
+  }
+}
+
+$closeBtn?.addEventListener('click', closeWithGrace);
 
 // R2-014: Esc closes the settings window (matches OS dialog convention).
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && document.activeElement?.tagName !== 'INPUT') {
-    window.close();
+    closeWithGrace();
   }
 });
 
@@ -213,7 +235,7 @@ $resetBtn?.addEventListener('click', async () => {
     layout: 'vertical',
     hotkeys: {
       toggle: 'Control+Shift+R',
-      render: 'Control+Shift+V',
+      render: 'Control+Alt+V',
       copyReply: 'Control+Shift+C',
       clear: 'Control+Shift+X',
     },
